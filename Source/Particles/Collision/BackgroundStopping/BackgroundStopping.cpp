@@ -153,7 +153,7 @@ void BackgroundStopping::doBackgroundStoppingOnElectronsWithinTile (WarpXParIter
     auto const T_e_func = m_background_temperature_func;
 
     // get Struct-Of-Array particle data, also called attribs
-    auto& attribs = pti.GetAttribs();
+    const auto& attribs = pti.GetAttribs();
     amrex::ParticleReal* const AMREX_RESTRICT ux = attribs[PIdx::ux].dataPtr();
     amrex::ParticleReal* const AMREX_RESTRICT uy = attribs[PIdx::uy].dataPtr();
     amrex::ParticleReal* const AMREX_RESTRICT uz = attribs[PIdx::uz].dataPtr();
@@ -228,7 +228,7 @@ void BackgroundStopping::doBackgroundStoppingOnIonsWithinTile (WarpXParIter& pti
     auto const T_i_func = m_background_temperature_func;
 
     // get Struct-Of-Array particle data, also called attribs
-    auto& attribs = pti.GetAttribs();
+    const auto& attribs = pti.GetAttribs();
     amrex::ParticleReal* const AMREX_RESTRICT ux = attribs[PIdx::ux].dataPtr();
     amrex::ParticleReal* const AMREX_RESTRICT uy = attribs[PIdx::uy].dataPtr();
     amrex::ParticleReal* const AMREX_RESTRICT uz = attribs[PIdx::uz].dataPtr();

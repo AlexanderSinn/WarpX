@@ -219,22 +219,22 @@ public:
                 copy_species1[0](soa_products_data[0], soa_1, static_cast<int>(p_pair_indices_1[i]),
                                 static_cast<int>(product1_index), engine);
                 // Set the weight of the new particles to p_pair_reaction_weight[i]
-                soa_products_data[0].m_rdata[PIdx::w][product1_index] = p_pair_reaction_weight[i];
+                soa_products_data[0].rdata(PIdx::w)[product1_index] = p_pair_reaction_weight[i];
 
                 const auto product2_index = products_np_data[1] + no_product_p_offsets[i];
                 // Make a copy of the particle from species 2
                 copy_species2[1](soa_products_data[1], soa_2, static_cast<int>(p_pair_indices_2[i]),
                                 static_cast<int>(product2_index), engine);
                 // Set the weight of the new particles to p_pair_reaction_weight[i]
-                soa_products_data[1].m_rdata[PIdx::w][product2_index] = p_pair_reaction_weight[i];
+                soa_products_data[1].rdata(PIdx::w)[product2_index] = p_pair_reaction_weight[i];
 
                 // Set the child particle properties appropriately
-                auto& ux1 = soa_products_data[0].m_rdata[PIdx::ux][product1_index];
-                auto& uy1 = soa_products_data[0].m_rdata[PIdx::uy][product1_index];
-                auto& uz1 = soa_products_data[0].m_rdata[PIdx::uz][product1_index];
-                auto& ux2 = soa_products_data[1].m_rdata[PIdx::ux][product2_index];
-                auto& uy2 = soa_products_data[1].m_rdata[PIdx::uy][product2_index];
-                auto& uz2 = soa_products_data[1].m_rdata[PIdx::uz][product2_index];
+                auto& ux1 = soa_products_data[0].rdata(PIdx::ux)[product1_index];
+                auto& uy1 = soa_products_data[0].rdata(PIdx::uy)[product1_index];
+                auto& uz1 = soa_products_data[0].rdata(PIdx::uz)[product1_index];
+                auto& ux2 = soa_products_data[1].rdata(PIdx::ux)[product2_index];
+                auto& uy2 = soa_products_data[1].rdata(PIdx::uy)[product2_index];
+                auto& uz2 = soa_products_data[1].rdata(PIdx::uz)[product2_index];
 
 #if (defined WARPX_DIM_RZ)
                 /* In RZ geometry, macroparticles can collide with other macroparticles
@@ -247,8 +247,8 @@ public:
                 * there is a corresponding assert statement at initialization.)
                 */
                 amrex::ParticleReal const theta = (
-                    soa_products_data[1].m_rdata[PIdx::theta][product2_index]
-                    - soa_products_data[0].m_rdata[PIdx::theta][product1_index]
+                    soa_products_data[1].rdata(PIdx::theta)[product2_index]
+                    - soa_products_data[0].rdata(PIdx::theta)[product1_index]
                 );
                 amrex::ParticleReal const ux1buf = ux1;
                 ux1 = ux1buf*std::cos(theta) - uy1*std::sin(theta);
@@ -333,34 +333,34 @@ public:
                 copy_species1[0](soa_products_data[0], soa_1, static_cast<int>(p_pair_indices_1[i]),
                                 static_cast<int>(species1_index), engine);
                 // Set the weight of the new particles to p_pair_reaction_weight[i]
-                soa_products_data[0].m_rdata[PIdx::w][species1_index] = p_pair_reaction_weight[i];
+                soa_products_data[0].rdata(PIdx::w)[species1_index] = p_pair_reaction_weight[i];
 
                 // create a copy of the first product species at the location of species 2
                 const auto product1_index = ioniz_product1_offset + with_product_p_offsets[i];
                 copy_species1[ioniz_product1_list_index](soa_products_data[ioniz_product1_list_index], soa_2, static_cast<int>(p_pair_indices_2[i]),
                                 static_cast<int>(product1_index), engine);
                 // Set the weight of the new particle to p_pair_reaction_weight[i]
-                soa_products_data[ioniz_product1_list_index].m_rdata[PIdx::w][product1_index] = p_pair_reaction_weight[i];
+                soa_products_data[ioniz_product1_list_index].rdata(PIdx::w)[product1_index] = p_pair_reaction_weight[i];
 
                 // create a copy of the other product species at the location of species 2
                 const auto product2_index = ioniz_product2_offset + with_product_p_offsets[i];
                 copy_species1[ioniz_product2_list_index](soa_products_data[ioniz_product2_list_index], soa_2, static_cast<int>(p_pair_indices_2[i]),
                                 static_cast<int>(product2_index), engine);
                 // Set the weight of the new particle to p_pair_reaction_weight[i]
-                soa_products_data[ioniz_product2_list_index].m_rdata[PIdx::w][product2_index] = p_pair_reaction_weight[i];
+                soa_products_data[ioniz_product2_list_index].rdata(PIdx::w)[product2_index] = p_pair_reaction_weight[i];
 
                 // Grab the colliding particle velocities to calculate the COM
                 // Note that the two product particles currently have the same
                 // velocity as the "target" particle
-                auto& ux1 = soa_products_data[0].m_rdata[PIdx::ux][species1_index];
-                auto& uy1 = soa_products_data[0].m_rdata[PIdx::uy][species1_index];
-                auto& uz1 = soa_products_data[0].m_rdata[PIdx::uz][species1_index];
-                auto& ux_p1 = soa_products_data[ioniz_product1_list_index].m_rdata[PIdx::ux][product1_index];
-                auto& uy_p1 = soa_products_data[ioniz_product1_list_index].m_rdata[PIdx::uy][product1_index];
-                auto& uz_p1 = soa_products_data[ioniz_product1_list_index].m_rdata[PIdx::uz][product1_index];
-                auto& ux_p2 = soa_products_data[ioniz_product2_list_index].m_rdata[PIdx::ux][product2_index];
-                auto& uy_p2 = soa_products_data[ioniz_product2_list_index].m_rdata[PIdx::uy][product2_index];
-                auto& uz_p2 = soa_products_data[ioniz_product2_list_index].m_rdata[PIdx::uz][product2_index];
+                auto& ux1 = soa_products_data[0].rdata(PIdx::ux)[species1_index];
+                auto& uy1 = soa_products_data[0].rdata(PIdx::uy)[species1_index];
+                auto& uz1 = soa_products_data[0].rdata(PIdx::uz)[species1_index];
+                auto& ux_p1 = soa_products_data[ioniz_product1_list_index].rdata(PIdx::ux)[product1_index];
+                auto& uy_p1 = soa_products_data[ioniz_product1_list_index].rdata(PIdx::uy)[product1_index];
+                auto& uz_p1 = soa_products_data[ioniz_product1_list_index].rdata(PIdx::uz)[product1_index];
+                auto& ux_p2 = soa_products_data[ioniz_product2_list_index].rdata(PIdx::ux)[product2_index];
+                auto& uy_p2 = soa_products_data[ioniz_product2_list_index].rdata(PIdx::uy)[product2_index];
+                auto& uz_p2 = soa_products_data[ioniz_product2_list_index].rdata(PIdx::uz)[product2_index];
 
 #if (defined WARPX_DIM_RZ)
                 /* In RZ geometry, macroparticles can collide with other macroparticles
@@ -373,8 +373,8 @@ public:
                 * there is a corresponding assert statement at initialization.)
                 */
                 amrex::ParticleReal const theta = (
-                    soa_products_data[ioniz_product1_list_index].m_rdata[PIdx::theta][product1_index]
-                    - soa_products_data[0].m_rdata[PIdx::theta][species1_index]
+                    soa_products_data[ioniz_product1_list_index].rdata(PIdx::theta)[product1_index]
+                    - soa_products_data[0].rdata(PIdx::theta)[species1_index]
                 );
                 amrex::ParticleReal const ux1buf = ux1;
                 ux1 = ux1buf*std::cos(theta) - uy1*std::sin(theta);

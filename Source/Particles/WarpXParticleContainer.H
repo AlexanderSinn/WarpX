@@ -100,61 +100,74 @@ struct IntIdx {
 };
 
 class WarpXParIter
-    : public amrex::ParIterSoA<PIdx::nattribs, 0>
+    : public amrex::ParIterSoA2<>
 {
 public:
-    using amrex::ParIterSoA<PIdx::nattribs, 0>::ParIterSoA;
+    using amrex::ParIterSoA2<>::ParIterSoA2;
 
     WarpXParIter (ContainerType& pc, int level);
 
     WarpXParIter (ContainerType& pc, int level, amrex::MFItInfo& info);
 
-    [[nodiscard]] const std::array<RealVector, PIdx::nattribs>& GetAttribs () const
+    [[nodiscard]] auto GetAttribs () const
     {
-        return GetStructOfArrays().GetRealData();
+        const auto& ptile = GetParticleTile();
+        std::vector<amrex::ArrayView<const amrex::ParticleReal>> vec(ptile.NumRealComps());
+
+        for (int comp = 0; comp < GetParticleTile().NumRealComps(); ++comp) {
+            vec[comp] = ptile.GetRealData(comp);
+        }
+
+        return vec;
     }
 
-    [[nodiscard]] std::array<RealVector, PIdx::nattribs>& GetAttribs ()
+    [[nodiscard]] auto GetAttribs ()
     {
-        return GetStructOfArrays().GetRealData();
+        std::vector<amrex::ArrayView<amrex::ParticleReal>> vec(GetParticleTile().NumRealComps());
+
+        for (int comp = 0; comp < GetParticleTile().NumRealComps(); ++comp) {
+            vec[comp] = GetParticleTile().GetRealData(comp);
+        }
+
+        return vec;
     }
 
-    [[nodiscard]] const RealVector& GetAttribs (int comp) const
+    [[nodiscard]] auto GetAttribs (int comp) const
     {
         return GetStructOfArrays().GetRealData(comp);
     }
 
-    [[nodiscard]] RealVector& GetAttribs (int comp)
+    [[nodiscard]] auto GetAttribs (int comp)
     {
         return GetStructOfArrays().GetRealData(comp);
     }
 
-    [[nodiscard]] const IntVector& GetiAttribs (int comp) const
+    [[nodiscard]] auto GetiAttribs (int comp) const
     {
         return GetStructOfArrays().GetIntData(comp);
     }
 
-    [[nodiscard]] IntVector& GetiAttribs (int comp)
+    [[nodiscard]] auto GetiAttribs (int comp)
     {
         return GetStructOfArrays().GetIntData(comp);
     }
 
-    [[nodiscard]] const RealVector& GetAttribs (const std::string& name) const
+    [[nodiscard]] auto GetAttribs (const std::string& name) const
     {
         return GetStructOfArrays().GetRealData(name);
     }
 
-    [[nodiscard]] RealVector& GetAttribs (const std::string& name)
+    [[nodiscard]] auto GetAttribs (const std::string& name)
     {
         return GetStructOfArrays().GetRealData(name);
     }
 
-    [[nodiscard]] const IntVector& GetiAttribs (const std::string& name) const
+    [[nodiscard]] auto GetiAttribs (const std::string& name) const
     {
         return GetStructOfArrays().GetIntData(name);
     }
 
-    [[nodiscard]] IntVector& GetiAttribs (const std::string& name)
+    [[nodiscard]] auto GetiAttribs (const std::string& name)
     {
         return GetStructOfArrays().GetIntData(name);
     }
@@ -183,7 +196,7 @@ public:
  * derived classes, e.g., Evolve) or actual functions (e.g. CurrentDeposition).
  */
 class WarpXParticleContainer
-    : public amrex::ParticleContainerPureSoA<PIdx::nattribs, 0, amrex::DefaultAllocator>
+    : public amrex::ParticleContainerPureSoA2<>
 {
 public:
     friend MultiParticleContainer;
@@ -236,7 +249,7 @@ public:
      * class.
      */
     virtual void DefaultInitializeRuntimeAttributes (
-        typename ContainerLike<amrex::PinnedArenaAllocator>::ParticleTileType& pinned_tile,
+        typename ParticleContainerType::ParticleTileType& pinned_tile,
         int n_external_attr_real,
         int n_external_attr_int) = 0;
 

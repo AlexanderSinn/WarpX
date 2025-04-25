@@ -39,7 +39,7 @@ struct IsOutsideDomainBoundary {
     int operator() (const SrcData& src,
                     int ip, const amrex::RandomEngine& /*engine*/) const noexcept
     {
-        const auto& p = src.getSuperParticle(ip);
+        const auto& p = src[ip];
         if (m_iside == 0) {
             if (p.pos(m_idim) < m_plo[m_idim]) { return 1; }
         } else {
@@ -66,26 +66,23 @@ struct FindEmbeddedBoundaryIntersection {
     {
         // Copy all particle attributes, from the source to the destination
         dst.m_idcpu[dst_i] = src.m_idcpu[src_i];
-        for (int j = 0; j < SrcData::NAR; ++j) {
-            dst.m_rdata[j][dst_i] = src.m_rdata[j][src_i];
+        for (int j = 0; j < src.m_n_real; ++j) {
+            dst.rdata(j)[dst_i] = src.rdata(j)[src_i];
         }
-        for (int j = 0; j < src.m_num_runtime_real; ++j) {
-            dst.m_runtime_rdata[j][dst_i] = src.m_runtime_rdata[j][src_i];
-        }
-        for (int j = 0; j < src.m_num_runtime_int; ++j) {
-            dst.m_runtime_idata[j][dst_i] = src.m_runtime_idata[j][src_i];
+        for (int j = 0; j < src.m_n_int; ++j) {
+            dst.idata(j)[dst_i] = src.idata(j)[src_i];
         }
 
         // Modify the position of the destination particle:
         // Move it to the point of intersection with the embedded boundary
         // (which is found by using a bisection algorithm)
 
-        const auto& p = dst.getSuperParticle(dst_i);
+        const auto& p = dst[dst_i];
         amrex::ParticleReal xp, yp, zp;
         get_particle_position( p, xp, yp, zp );
-        amrex::ParticleReal const ux = dst.m_rdata[PIdx::ux][dst_i];
-        amrex::ParticleReal const uy = dst.m_rdata[PIdx::uy][dst_i];
-        amrex::ParticleReal const uz = dst.m_rdata[PIdx::uz][dst_i];
+        amrex::ParticleReal const ux = dst.rdata(PIdx::ux)[dst_i];
+        amrex::ParticleReal const uy = dst.rdata(PIdx::uy)[dst_i];
+        amrex::ParticleReal const uz = dst.rdata(PIdx::uz)[dst_i];
 
         // Temporary variables to avoid implicit capture
         amrex::Real const dt = m_dt;
@@ -107,8 +104,8 @@ struct FindEmbeddedBoundaryIntersection {
             } );
 
         // Also record the real time on the destination
-        dst.m_runtime_idata[m_step_index][dst_i] = m_step;
-        dst.m_runtime_rdata[m_delta_index][dst_i] = (1._rt- dt_fraction)*m_dt;
+        dst.idata(m_step_index)[dst_i] = m_step;
+        dst.rdata(PIdx::nattribs + m_delta_index)[dst_i] = (1._rt- dt_fraction)*m_dt;
 
         // Now that dt_fraction has be obtained (with bisect)
         // Save the corresponding position of the particle at the boundary
@@ -128,37 +125,37 @@ struct FindEmbeddedBoundaryIntersection {
         DistanceToEB::normalize(normal);
 
 #if (defined WARPX_DIM_3D)
-        dst.m_rdata[PIdx::x][dst_i] = x_temp;
-        dst.m_rdata[PIdx::y][dst_i] = y_temp;
-        dst.m_rdata[PIdx::z][dst_i] = z_temp;
+        dst.rdata(PIdx::x)[dst_i] = x_temp;
+        dst.rdata(PIdx::y)[dst_i] = y_temp;
+        dst.rdata(PIdx::z)[dst_i] = z_temp;
         //save normal components
-        dst.m_runtime_rdata[m_normal_index][dst_i] = normal[0];
-        dst.m_runtime_rdata[m_normal_index+1][dst_i] = normal[1];
-        dst.m_runtime_rdata[m_normal_index+2][dst_i] = normal[2];
+        dst.rdata(PIdx::nattribs + m_normal_index)[dst_i] = normal[0];
+        dst.rdata(PIdx::nattribs + m_normal_index+1)[dst_i] = normal[1];
+        dst.rdata(PIdx::nattribs + m_normal_index+2)[dst_i] = normal[2];
 #elif (defined WARPX_DIM_XZ)
-        dst.m_rdata[PIdx::x][dst_i] = x_temp;
-        dst.m_rdata[PIdx::z][dst_i] = z_temp;
+        dst.rdata(PIdx::x)[dst_i] = x_temp;
+        dst.rdata(PIdx::z)[dst_i] = z_temp;
         amrex::ignore_unused(y_temp);
         //save normal components
-        dst.m_runtime_rdata[m_normal_index][dst_i] = normal[0];
-        dst.m_runtime_rdata[m_normal_index+1][dst_i] = 0.0;
-        dst.m_runtime_rdata[m_normal_index+2][dst_i] = normal[1];
+        dst.rdata(PIdx::nattribs + m_normal_index)[dst_i] = normal[0];
+        dst.rdata(PIdx::nattribs + m_normal_index+1)[dst_i] = 0.0;
+        dst.rdata(PIdx::nattribs + m_normal_index+2)[dst_i] = normal[1];
 #elif (defined WARPX_DIM_RZ)
-        dst.m_rdata[PIdx::x][dst_i] = std::sqrt(x_temp*x_temp + y_temp*y_temp);
-        dst.m_rdata[PIdx::z][dst_i] = z_temp;
-        dst.m_rdata[PIdx::theta][dst_i] = std::atan2(y_temp, x_temp);
+        dst.rdata(PIdx::x)[dst_i] = std::sqrt(x_temp*x_temp + y_temp*y_temp);
+        dst.rdata(PIdx::z)[dst_i] = z_temp;
+        dst.rdata(PIdx::theta)[dst_i] = std::atan2(y_temp, x_temp);
         //save normal components
         amrex::Real const theta = std::atan2(y_temp, x_temp);
-        dst.m_runtime_rdata[m_normal_index][dst_i] = normal[0]*std::cos(theta);
-        dst.m_runtime_rdata[m_normal_index+1][dst_i] = normal[0]*std::sin(theta);
-        dst.m_runtime_rdata[m_normal_index+2][dst_i] = normal[1];
+        dst.rdata(PIdx::nattribs + m_normal_index)[dst_i] = normal[0]*std::cos(theta);
+        dst.rdata(PIdx::nattribs + m_normal_index+1)[dst_i] = normal[0]*std::sin(theta);
+        dst.rdata(PIdx::nattribs + m_normal_index+2)[dst_i] = normal[1];
 #elif (defined WARPX_DIM_1D_Z)
-        dst.m_rdata[PIdx::z][dst_i] = z_temp;
+        dst.rdata(PIdx::z)[dst_i] = z_temp;
         amrex::ignore_unused(x_temp, y_temp);
         //normal not defined
-        dst.m_runtime_rdata[m_normal_index][dst_i] = 0.0;
-        dst.m_runtime_rdata[m_normal_index+1][dst_i] = 0.0;
-        dst.m_runtime_rdata[m_normal_index+2][dst_i] = 0.0;
+        dst.rdata(PIdx::nattribs + m_normal_index)[dst_i] = 0.0;
+        dst.rdata(PIdx::nattribs + m_normal_index+1)[dst_i] = 0.0;
+        dst.rdata(PIdx::nattribs + m_normal_index+2)[dst_i] = 0.0;
 #else
         amrex::ignore_unused(x_temp, y_temp, z_temp,normal);
 #endif
@@ -184,25 +181,22 @@ struct CopyAndTimestamp {
                      int src_i, int dst_i) const noexcept
     {
         dst.m_idcpu[dst_i] = src.m_idcpu[src_i];
-        for (int j = 0; j < SrcData::NAR; ++j) {
-            dst.m_rdata[j][dst_i] = src.m_rdata[j][src_i];
+        for (int j = 0; j < src.m_n_real; ++j) {
+            dst.rdata(j)[dst_i] = src.rdata(j)[src_i];
         }
-        for (int j = 0; j < src.m_num_runtime_real; ++j) {
-            dst.m_runtime_rdata[j][dst_i] = src.m_runtime_rdata[j][src_i];
-        }
-        for (int j = 0; j < src.m_num_runtime_int; ++j) {
-            dst.m_runtime_idata[j][dst_i] = src.m_runtime_idata[j][src_i];
+        for (int j = 0; j < src.m_n_int; ++j) {
+            dst.idata(j)[dst_i] = src.idata(j)[src_i];
         }
 
-        dst.m_runtime_idata[m_step_index][dst_i] = m_step;
-        dst.m_runtime_rdata[m_delta_index][dst_i] = 0._rt; //delta_fraction is initialized to zero
+        dst.idata(m_step_index)[dst_i] = m_step;
+        dst.rdata(PIdx::nattribs + m_delta_index)[dst_i] = 0._rt; //delta_fraction is initialized to zero
 
         //calculation of the normal to the boundary
         std::array<double, 3> n = {0.0, 0.0, 0.0};
         n[m_idim]=1-2*m_iside;
-        dst.m_runtime_rdata[m_normal_index][dst_i]= n[0];
-        dst.m_runtime_rdata[m_normal_index+1][dst_i]= n[1];
-        dst.m_runtime_rdata[m_normal_index+2][dst_i]= n[2];
+        dst.rdata(PIdx::nattribs + m_normal_index)[dst_i]= n[0];
+        dst.rdata(PIdx::nattribs + m_normal_index+1)[dst_i]= n[1];
+        dst.rdata(PIdx::nattribs + m_normal_index+2)[dst_i]= n[2];
 
         // flip id to positive in destination
         amrex::ParticleIDWrapper{dst.m_idcpu[dst_i]}.make_valid();
@@ -366,7 +360,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromDomainBoundaries (MultiParticleC
 {
     WARPX_PROFILE("ParticleBoundaryBuffer::gatherParticles");
 
-    using PIter = amrex::ParConstIterSoA<PIdx::nattribs, 0>;
+    using WarpXParIter = amrex::ParConstIterSoA2<>;
     const auto& warpx_instance = WarpX::GetInstance();
     const amrex::Geometry& geom = warpx_instance.Geom(0);
     auto plo = geom.ProbLoArray();
@@ -383,7 +377,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromDomainBoundaries (MultiParticleC
                 const WarpXParticleContainer& pc = mypc.GetParticleContainer(i);
                 if (!buffer[i].isDefined())
                 {
-                    buffer[i] = pc.make_alike<amrex::PinnedArenaAllocator>();
+                    buffer[i] = pc.make_alike<amrex::PolymorphicArenaAllocator>();
                     buffer[i].AddIntComp("stepScraped", true);
                     buffer[i].AddRealComp("deltaTimeScraped", true);
                     buffer[i].AddRealComp("nx", true);
@@ -393,7 +387,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromDomainBoundaries (MultiParticleC
 
                 auto& species_buffer = buffer[i];
                 for (int lev = 0; lev < pc.numLevels(); ++lev){
-                    for(PIter pti(pc, lev); pti.isValid(); ++pti){
+                    for(WarpXParIter pti(pc, lev); pti.isValid(); ++pti){
                         species_buffer.DefineAndReturnParticleTile(
                             lev, pti.index(), pti.LocalTileIndex());
                     }
@@ -401,7 +395,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromDomainBoundaries (MultiParticleC
 
                 for (int lev = 0; lev < pc.numLevels(); ++lev)
                 {
-                    for (PIter pti(pc, lev); pti.isValid(); ++pti) {
+                    for (WarpXParIter pti(pc, lev); pti.isValid(); ++pti) {
                         species_buffer.DefineAndReturnParticleTile(
                             lev, pti.index(), pti.LocalTileIndex());
                     }
@@ -410,7 +404,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromDomainBoundaries (MultiParticleC
 #ifdef AMREX_USE_OMP
 #pragma omp parallel if (amrex::Gpu::notInLaunchRegion())
 #endif
-                    for(PIter pti(pc, lev); pti.isValid(); ++pti)
+                    for(WarpXParIter pti(pc, lev); pti.isValid(); ++pti)
                     {
                         auto index = std::make_pair(pti.index(), pti.LocalTileIndex());
 
@@ -466,8 +460,6 @@ void ParticleBoundaryBuffer::gatherParticlesFromEmbeddedBoundaries (
     if (EB::enabled()) {
         WARPX_PROFILE("ParticleBoundaryBuffer::gatherParticles::EB");
 
-
-        using PIter = amrex::ParConstIterSoA<PIdx::nattribs, 0>;
         const auto &warpx_instance = WarpX::GetInstance();
         const amrex::Geometry &geom = warpx_instance.Geom(0);
         auto plo = geom.ProbLoArray();
@@ -479,7 +471,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromEmbeddedBoundaries (
             const auto& pc = mypc.GetParticleContainer(i);
             if (!buffer[i].isDefined())
             {
-                buffer[i] = pc.make_alike<amrex::PinnedArenaAllocator>();
+                buffer[i] = pc.make_alike<amrex::PolymorphicArenaAllocator>();
                 buffer[i].AddIntComp("stepScraped", true);
                 buffer[i].AddRealComp("deltaTimeScraped", true);
                 buffer[i].AddRealComp("nx", true);
@@ -490,7 +482,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromEmbeddedBoundaries (
 
             auto& species_buffer = buffer[i];
             for (int lev = 0; lev < pc.numLevels(); ++lev) {
-                for (PIter pti(pc, lev); pti.isValid(); ++pti) {
+                for (WarpXParIter pti(pc, lev); pti.isValid(); ++pti) {
                     species_buffer.DefineAndReturnParticleTile(
                         lev, pti.index(), pti.LocalTileIndex());
                 }
@@ -503,7 +495,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromEmbeddedBoundaries (
 #ifdef AMREX_USE_OMP
 #pragma omp parallel if (amrex::Gpu::notInLaunchRegion())
 #endif
-                for (PIter pti(pc, lev); pti.isValid(); ++pti) {
+                for (WarpXParIter pti(pc, lev); pti.isValid(); ++pti) {
                     auto phiarr = (*distance_to_eb[lev])[pti].array();  // signed distance function
                     auto index = std::make_pair(pti.index(), pti.LocalTileIndex());
                     if (plevel.find(index) == plevel.end()) { continue; }

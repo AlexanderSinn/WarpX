@@ -24,7 +24,7 @@
  */
 template<typename T_PIdx = PIdx>
 AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
-void get_particle_position (const WarpXParticleContainer::SuperParticleType& p,
+void get_particle_position (const WarpXParticleContainer::ConstParticleType& p,
                             amrex::ParticleReal& x,
                             amrex::ParticleReal& y,
                             amrex::ParticleReal& z) noexcept

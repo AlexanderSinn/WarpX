@@ -42,7 +42,7 @@ The innermost step ``[MY INNER LOOP]`` typically calls ``amrex::ParallelFor`` to
 
   // Get Struct-Of-Array particle data, also called attribs
   // (x, y, z, ux, uy, uz, w)
-  auto& attribs = pti.GetAttribs();
+  const auto& attribs = pti.GetAttribs();
   auto& x = attribs[PIdx::x];
   // [...]
   // Number of particles in this box

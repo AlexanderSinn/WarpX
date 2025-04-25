@@ -109,7 +109,7 @@ PhotonParticleContainer::PushPX (WarpXParIter& pti,
     // Add guard cells to the box.
     box.grow(ngEB);
 
-    auto& attribs = pti.GetAttribs();
+    const auto& attribs = pti.GetAttribs();
 
     // Extract pointers to the different particle quantities
     ParticleReal* const AMREX_RESTRICT ux = attribs[PIdx::ux].dataPtr() + offset;

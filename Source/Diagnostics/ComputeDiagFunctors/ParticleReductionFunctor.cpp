@@ -58,7 +58,7 @@ ParticleReductionFunctor::operator() (amrex::MultiFab& mf_dst, const int dcomp, 
     auto filter_fn = m_filter_fn;
     const bool do_filter = m_do_filter;
     ParticleToMesh(pc, red_mf, m_lev,
-            [=] AMREX_GPU_DEVICE (const WarpXParticleContainer::SuperParticleType& p,
+            [=] AMREX_GPU_DEVICE (const WarpXParticleContainer::ConstParticleType& p,
                 amrex::Array4<amrex::Real> const& out_array,
                 amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> const& plo,
                 amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> const& dxi)
@@ -86,7 +86,7 @@ ParticleReductionFunctor::operator() (amrex::MultiFab& mf_dst, const int dcomp, 
         amrex::MultiFab ppc_mf(warpx.boxArray(m_lev), warpx.DistributionMap(m_lev), 1, ng);
         // Add the weight for each particle -- total number of particles of this species
         ParticleToMesh(pc, ppc_mf, m_lev,
-                [=] AMREX_GPU_DEVICE (const WarpXParticleContainer::SuperParticleType& p,
+                [=] AMREX_GPU_DEVICE (const WarpXParticleContainer::ConstParticleType& p,
                     amrex::Array4<amrex::Real> const& out_array,
                     amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> const& plo,
                     amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> const& dxi)

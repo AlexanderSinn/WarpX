@@ -81,7 +81,7 @@ public:
         if (Random(engine) > m_total_collision_prob) { return false; }
 
         // get references to the particle to get its position
-        const auto& p = ptd.getSuperParticle(i);
+        const auto& p = ptd[i];
         ParticleReal x, y, z;
         double E_coll;
         get_particle_position(p, x, y, z);
@@ -90,9 +90,9 @@ public:
         const ParticleReal n_a = m_n_a_func(x, y, z, m_t);
 
         // get the particle velocity
-        const ParticleReal ux = ptd.m_rdata[PIdx::ux][i];
-        const ParticleReal uy = ptd.m_rdata[PIdx::uy][i];
-        const ParticleReal uz = ptd.m_rdata[PIdx::uz][i];
+        const ParticleReal ux = ptd.rdata(PIdx::ux)[i];
+        const ParticleReal uy = ptd.rdata(PIdx::uy)[i];
+        const ParticleReal uz = ptd.rdata(PIdx::uz)[i];
 
         // calculate kinetic energy
         constexpr auto eV = PhysConst::q_e;
@@ -177,7 +177,7 @@ public:
         using std::sqrt;
 
         // get references to the particle to get its position
-        const auto& p = src.getSuperParticle(i_src);
+        const auto& p = src[i_src];
         ParticleReal x, y, z;
         double E_coll;
         get_particle_position(p, x, y, z);
@@ -187,17 +187,17 @@ public:
         const ParticleReal ion_vel_std = m_sqrt_kb_m * std::sqrt(m_T_a_func(x, y, z, m_t));
 
         // get references to the original particle's velocity
-        auto& ux = src.m_rdata[PIdx::ux][i_src];
-        auto& uy = src.m_rdata[PIdx::uy][i_src];
-        auto& uz = src.m_rdata[PIdx::uz][i_src];
+        auto& ux = src.rdata(PIdx::ux)[i_src];
+        auto& uy = src.rdata(PIdx::uy)[i_src];
+        auto& uz = src.rdata(PIdx::uz)[i_src];
 
         // get references to the new particles' velocities
-        auto& e_ux = dst1.m_rdata[PIdx::ux][i_dst1];
-        auto& e_uy = dst1.m_rdata[PIdx::uy][i_dst1];
-        auto& e_uz = dst1.m_rdata[PIdx::uz][i_dst1];
-        auto& i_ux = dst2.m_rdata[PIdx::ux][i_dst2];
-        auto& i_uy = dst2.m_rdata[PIdx::uy][i_dst2];
-        auto& i_uz = dst2.m_rdata[PIdx::uz][i_dst2];
+        auto& e_ux = dst1.rdata(PIdx::ux)[i_dst1];
+        auto& e_uy = dst1.rdata(PIdx::uy)[i_dst1];
+        auto& e_uz = dst1.rdata(PIdx::uz)[i_dst1];
+        auto& i_ux = dst2.rdata(PIdx::ux)[i_dst2];
+        auto& i_uy = dst2.rdata(PIdx::uy)[i_dst2];
+        auto& i_uz = dst2.rdata(PIdx::uz)[i_dst2];
 
         // calculate kinetic energy
         constexpr auto eV = PhysConst::q_e;

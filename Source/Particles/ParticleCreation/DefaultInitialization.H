@@ -139,9 +139,9 @@ void DefaultInitializeRuntimeAttributes (PTile& ptile,
         const auto n_user_int_attribs = static_cast<int>(user_int_attribs.size());
         const auto get_position = GetParticlePosition<PIdx>(ptile);
         const auto soa = ptile.getParticleTileData();
-        const amrex::ParticleReal* AMREX_RESTRICT ux = soa.m_rdata[PIdx::ux];
-        const amrex::ParticleReal* AMREX_RESTRICT uy = soa.m_rdata[PIdx::uy];
-        const amrex::ParticleReal* AMREX_RESTRICT uz = soa.m_rdata[PIdx::uz];
+        const amrex::ParticleReal* AMREX_RESTRICT ux = soa.rdata(PIdx::ux);
+        const amrex::ParticleReal* AMREX_RESTRICT uy = soa.rdata(PIdx::uy);
+        const amrex::ParticleReal* AMREX_RESTRICT uz = soa.rdata(PIdx::uz);
         constexpr int lev = 0;
         const amrex::Real t = WarpX::GetInstance().gett_new(lev);
 
@@ -159,7 +159,7 @@ void DefaultInitializeRuntimeAttributes (PTile& ptile,
                 const QuantumSynchrotronGetOpticalDepth quantum_sync_get_opt =
                                                 p_qs_engine->build_optical_depth_functor();
                 // If the particle tile was allocated in a memory pool that can run on GPU, launch GPU kernel
-                if constexpr (amrex::RunOnGpu<typename PTile::template AllocatorType<amrex::Real>>::value) {
+                if (ptile.arena()->isDeviceAccessible()) {
                         amrex::ParallelForRNG(stop - start,
                                               [=] AMREX_GPU_DEVICE (int i, amrex::RandomEngine const& engine) noexcept {
                                                   const int ip = i + start;
@@ -182,7 +182,7 @@ void DefaultInitializeRuntimeAttributes (PTile& ptile,
                 const BreitWheelerGetOpticalDepth breit_wheeler_get_opt =
                                                 p_bw_engine->build_optical_depth_functor();;
                 // If the particle tile was allocated in a memory pool that can run on GPU, launch GPU kernel
-                if constexpr (amrex::RunOnGpu<typename PTile::template AllocatorType<amrex::Real>>::value) {
+                if (ptile.arena()->isDeviceAccessible()) {
                         amrex::ParallelForRNG(stop - start,
                                               [=] AMREX_GPU_DEVICE (int i, amrex::RandomEngine const& engine) noexcept {
                                                   const int ip = i + start;
@@ -207,7 +207,7 @@ void DefaultInitializeRuntimeAttributes (PTile& ptile,
                     const amrex::ParserExecutor<7> user_real_attrib_parserexec =
                                              user_real_attrib_parser[ia]->compile<7>();
                     // If the particle tile was allocated in a memory pool that can run on GPU, launch GPU kernel
-                    if constexpr (amrex::RunOnGpu<typename PTile::template AllocatorType<amrex::Real>>::value) {
+                    if (ptile.arena()->isDeviceAccessible()) {
                         amrex::ParallelFor(stop - start,
                                            [=] AMREX_GPU_DEVICE (int i) noexcept {
                                                const int ip = i + start;
@@ -239,7 +239,7 @@ void DefaultInitializeRuntimeAttributes (PTile& ptile,
             if (it_ioniz != particle_icomps.end() &&
                 std::distance(particle_icomps.begin(), it_ioniz) == j)
             {
-                if constexpr (amrex::RunOnGpu<typename PTile::template AllocatorType<int>>::value) {
+                if (ptile.arena()->isDeviceAccessible()) {
                         amrex::ParallelFor(stop - start,
                                            [=] AMREX_GPU_DEVICE (int i) noexcept {
                                                const int ip = i + start;
@@ -261,7 +261,7 @@ void DefaultInitializeRuntimeAttributes (PTile& ptile,
                 {
                      const amrex::ParserExecutor<7> user_int_attrib_parserexec =
                                              user_int_attrib_parser[ia]->compile<7>();
-                if constexpr (amrex::RunOnGpu<typename PTile::template AllocatorType<int>>::value) {
+                if (ptile.arena()->isDeviceAccessible()) {
                         amrex::ParallelFor(stop - start,
                                            [=] AMREX_GPU_DEVICE (int i) noexcept {
                                                const int ip = i + start;

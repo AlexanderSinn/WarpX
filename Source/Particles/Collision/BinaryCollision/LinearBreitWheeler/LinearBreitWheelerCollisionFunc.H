@@ -153,16 +153,16 @@ public:
             amrex::ParticleReal* AMREX_RESTRICT p_pair_reaction_weight,
             amrex::RandomEngine const& engine) const
         {
-            amrex::ParticleReal * const AMREX_RESTRICT w1 = soa_1.m_rdata[PIdx::w];
-            amrex::ParticleReal * const AMREX_RESTRICT u1x = soa_1.m_rdata[PIdx::ux];
-            amrex::ParticleReal * const AMREX_RESTRICT u1y = soa_1.m_rdata[PIdx::uy];
-            amrex::ParticleReal * const AMREX_RESTRICT u1z = soa_1.m_rdata[PIdx::uz];
+            amrex::ParticleReal * const AMREX_RESTRICT w1 = soa_1.rdata(PIdx::w);
+            amrex::ParticleReal * const AMREX_RESTRICT u1x = soa_1.rdata(PIdx::ux);
+            amrex::ParticleReal * const AMREX_RESTRICT u1y = soa_1.rdata(PIdx::uy);
+            amrex::ParticleReal * const AMREX_RESTRICT u1z = soa_1.rdata(PIdx::uz);
             uint64_t* AMREX_RESTRICT idcpu1 = soa_1.m_idcpu;
 
-            amrex::ParticleReal * const AMREX_RESTRICT w2 = soa_2.m_rdata[PIdx::w];
-            amrex::ParticleReal * const AMREX_RESTRICT u2x = soa_2.m_rdata[PIdx::ux];
-            amrex::ParticleReal * const AMREX_RESTRICT u2y = soa_2.m_rdata[PIdx::uy];
-            amrex::ParticleReal * const AMREX_RESTRICT u2z = soa_2.m_rdata[PIdx::uz];
+            amrex::ParticleReal * const AMREX_RESTRICT w2 = soa_2.rdata(PIdx::w);
+            amrex::ParticleReal * const AMREX_RESTRICT u2x = soa_2.rdata(PIdx::ux);
+            amrex::ParticleReal * const AMREX_RESTRICT u2y = soa_2.rdata(PIdx::uy);
+            amrex::ParticleReal * const AMREX_RESTRICT u2z = soa_2.rdata(PIdx::uz);
             uint64_t* AMREX_RESTRICT idcpu2 = soa_2.m_idcpu;
 
             // Number of macroparticles of each species
@@ -178,8 +178,8 @@ public:
                 m_isSameSpecies ? min_N + max_N - 1 : min_N);
 
 #if (defined WARPX_DIM_RZ)
-            amrex::ParticleReal * const AMREX_RESTRICT theta1 = soa_1.m_rdata[PIdx::theta];
-            amrex::ParticleReal * const AMREX_RESTRICT theta2 = soa_2.m_rdata[PIdx::theta];
+            amrex::ParticleReal * const AMREX_RESTRICT theta1 = soa_1.rdata(PIdx::theta);
+            amrex::ParticleReal * const AMREX_RESTRICT theta2 = soa_2.rdata(PIdx::theta);
 #endif
             index_type i1 = I1s + coll_idx;
             index_type i2 = I2s + coll_idx;

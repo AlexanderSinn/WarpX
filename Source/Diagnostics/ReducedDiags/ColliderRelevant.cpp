@@ -221,7 +221,7 @@ void ColliderRelevant::ComputeDiags (int step)
         // get charge
         amrex::ParticleReal const q = myspc.getCharge();
 
-        using PType = typename WarpXParticleContainer::SuperParticleType;
+        using PType = typename WarpXParticleContainer::ConstParticleType;
 
         num_dens[i_s] = myspc.GetChargeDensity(0);
         num_dens[i_s]->mult(1._prt/q);

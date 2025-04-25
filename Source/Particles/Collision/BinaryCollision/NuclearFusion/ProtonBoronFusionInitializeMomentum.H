@@ -96,12 +96,12 @@ namespace {
         amrex::ParticleReal ux_alpha1 = 0.0, uy_alpha1 = 0.0, uz_alpha1 = 0.0;
         amrex::ParticleReal ux_Be = 0.0, uy_Be = 0.0, uz_Be = 0.0;
         TwoProductFusionComputeProductMomenta (
-            soa_1.m_rdata[PIdx::ux][idx_1],
-            soa_1.m_rdata[PIdx::uy][idx_1],
-            soa_1.m_rdata[PIdx::uz][idx_1], m1,
-            soa_2.m_rdata[PIdx::ux][idx_2],
-            soa_2.m_rdata[PIdx::uy][idx_2],
-            soa_2.m_rdata[PIdx::uz][idx_2], m2,
+            soa_1.rdata(PIdx::ux)[idx_1],
+            soa_1.rdata(PIdx::uy)[idx_1],
+            soa_1.rdata(PIdx::uz)[idx_1], m1,
+            soa_2.rdata(PIdx::ux)[idx_2],
+            soa_2.rdata(PIdx::uy)[idx_2],
+            soa_2.rdata(PIdx::uz)[idx_2], m2,
             ux_alpha1, uy_alpha1, uz_alpha1, static_cast<amrex::ParticleReal>(m_alpha),
             ux_Be, uy_Be, uz_Be, static_cast<amrex::ParticleReal>(m_beryllium),
             E_fusion, engine);
@@ -158,24 +158,24 @@ namespace {
         // Fill alpha species momentum data with the computed momentum (note that we actually
         // create 6 alphas, 3 at the position of the proton and 3 at the position of the boron, so
         // each computed momentum is used twice)
-        soa_alpha.m_rdata[PIdx::ux][idx_alpha_start] = ux_alpha1;
-        soa_alpha.m_rdata[PIdx::uy][idx_alpha_start] = uy_alpha1;
-        soa_alpha.m_rdata[PIdx::uz][idx_alpha_start] = uz_alpha1;
-        soa_alpha.m_rdata[PIdx::ux][idx_alpha_start + 1] = ux_alpha1;
-        soa_alpha.m_rdata[PIdx::uy][idx_alpha_start + 1] = uy_alpha1;
-        soa_alpha.m_rdata[PIdx::uz][idx_alpha_start + 1] = uz_alpha1;
-        soa_alpha.m_rdata[PIdx::ux][idx_alpha_start + 2] = px_alpha2/static_cast<amrex::ParticleReal>(m_alpha);
-        soa_alpha.m_rdata[PIdx::uy][idx_alpha_start + 2] = py_alpha2/static_cast<amrex::ParticleReal>(m_alpha);
-        soa_alpha.m_rdata[PIdx::uz][idx_alpha_start + 2] = pz_alpha2/static_cast<amrex::ParticleReal>(m_alpha);
-        soa_alpha.m_rdata[PIdx::ux][idx_alpha_start + 3] = px_alpha2/static_cast<amrex::ParticleReal>(m_alpha);
-        soa_alpha.m_rdata[PIdx::uy][idx_alpha_start + 3] = py_alpha2/static_cast<amrex::ParticleReal>(m_alpha);
-        soa_alpha.m_rdata[PIdx::uz][idx_alpha_start + 3] = pz_alpha2/static_cast<amrex::ParticleReal>(m_alpha);
-        soa_alpha.m_rdata[PIdx::ux][idx_alpha_start + 4] = px_alpha3/static_cast<amrex::ParticleReal>(m_alpha);
-        soa_alpha.m_rdata[PIdx::uy][idx_alpha_start + 4] = py_alpha3/static_cast<amrex::ParticleReal>(m_alpha);
-        soa_alpha.m_rdata[PIdx::uz][idx_alpha_start + 4] = pz_alpha3/static_cast<amrex::ParticleReal>(m_alpha);
-        soa_alpha.m_rdata[PIdx::ux][idx_alpha_start + 5] = px_alpha3/static_cast<amrex::ParticleReal>(m_alpha);
-        soa_alpha.m_rdata[PIdx::uy][idx_alpha_start + 5] = py_alpha3/static_cast<amrex::ParticleReal>(m_alpha);
-        soa_alpha.m_rdata[PIdx::uz][idx_alpha_start + 5] = pz_alpha3/static_cast<amrex::ParticleReal>(m_alpha);
+        soa_alpha.rdata(PIdx::ux)[idx_alpha_start] = ux_alpha1;
+        soa_alpha.rdata(PIdx::uy)[idx_alpha_start] = uy_alpha1;
+        soa_alpha.rdata(PIdx::uz)[idx_alpha_start] = uz_alpha1;
+        soa_alpha.rdata(PIdx::ux)[idx_alpha_start + 1] = ux_alpha1;
+        soa_alpha.rdata(PIdx::uy)[idx_alpha_start + 1] = uy_alpha1;
+        soa_alpha.rdata(PIdx::uz)[idx_alpha_start + 1] = uz_alpha1;
+        soa_alpha.rdata(PIdx::ux)[idx_alpha_start + 2] = px_alpha2/static_cast<amrex::ParticleReal>(m_alpha);
+        soa_alpha.rdata(PIdx::uy)[idx_alpha_start + 2] = py_alpha2/static_cast<amrex::ParticleReal>(m_alpha);
+        soa_alpha.rdata(PIdx::uz)[idx_alpha_start + 2] = pz_alpha2/static_cast<amrex::ParticleReal>(m_alpha);
+        soa_alpha.rdata(PIdx::ux)[idx_alpha_start + 3] = px_alpha2/static_cast<amrex::ParticleReal>(m_alpha);
+        soa_alpha.rdata(PIdx::uy)[idx_alpha_start + 3] = py_alpha2/static_cast<amrex::ParticleReal>(m_alpha);
+        soa_alpha.rdata(PIdx::uz)[idx_alpha_start + 3] = pz_alpha2/static_cast<amrex::ParticleReal>(m_alpha);
+        soa_alpha.rdata(PIdx::ux)[idx_alpha_start + 4] = px_alpha3/static_cast<amrex::ParticleReal>(m_alpha);
+        soa_alpha.rdata(PIdx::uy)[idx_alpha_start + 4] = py_alpha3/static_cast<amrex::ParticleReal>(m_alpha);
+        soa_alpha.rdata(PIdx::uz)[idx_alpha_start + 4] = pz_alpha3/static_cast<amrex::ParticleReal>(m_alpha);
+        soa_alpha.rdata(PIdx::ux)[idx_alpha_start + 5] = px_alpha3/static_cast<amrex::ParticleReal>(m_alpha);
+        soa_alpha.rdata(PIdx::uy)[idx_alpha_start + 5] = py_alpha3/static_cast<amrex::ParticleReal>(m_alpha);
+        soa_alpha.rdata(PIdx::uz)[idx_alpha_start + 5] = pz_alpha3/static_cast<amrex::ParticleReal>(m_alpha);
     }
 
 }

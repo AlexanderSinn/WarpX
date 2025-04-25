@@ -60,15 +60,15 @@ void ElasticCollisionPerez (
     const T_index max_N = amrex::max(NI1,NI2);
     const T_index min_N = amrex::min(NI1,NI2);
 
-    T_PR * const AMREX_RESTRICT w1 = soa_1.m_rdata[PIdx::w];
-    T_PR * const AMREX_RESTRICT u1x = soa_1.m_rdata[PIdx::ux];
-    T_PR * const AMREX_RESTRICT u1y = soa_1.m_rdata[PIdx::uy];
-    T_PR * const AMREX_RESTRICT u1z = soa_1.m_rdata[PIdx::uz];
+    T_PR * const AMREX_RESTRICT w1 = soa_1.rdata(PIdx::w);
+    T_PR * const AMREX_RESTRICT u1x = soa_1.rdata(PIdx::ux);
+    T_PR * const AMREX_RESTRICT u1y = soa_1.rdata(PIdx::uy);
+    T_PR * const AMREX_RESTRICT u1z = soa_1.rdata(PIdx::uz);
 
-    T_PR * const AMREX_RESTRICT w2 = soa_2.m_rdata[PIdx::w];
-    T_PR * const AMREX_RESTRICT u2x = soa_2.m_rdata[PIdx::ux];
-    T_PR * const AMREX_RESTRICT u2y = soa_2.m_rdata[PIdx::uy];
-    T_PR * const AMREX_RESTRICT u2z = soa_2.m_rdata[PIdx::uz];
+    T_PR * const AMREX_RESTRICT w2 = soa_2.rdata(PIdx::w);
+    T_PR * const AMREX_RESTRICT u2x = soa_2.rdata(PIdx::ux);
+    T_PR * const AMREX_RESTRICT u2y = soa_2.rdata(PIdx::uy);
+    T_PR * const AMREX_RESTRICT u2z = soa_2.rdata(PIdx::uz);
 
     // compute Debye length lmdD (if not using a fixed L = Coulomb log)
     T_PR lmdD = T_PR(-1.0);
@@ -92,8 +92,8 @@ void ElasticCollisionPerez (
     const T_PR sigma_max = T_PR(1.0) / (maxn * rmin);
 
 #if (defined WARPX_DIM_RZ)
-    T_PR * const AMREX_RESTRICT theta1 = soa_1.m_rdata[PIdx::theta];
-    T_PR * const AMREX_RESTRICT theta2 = soa_2.m_rdata[PIdx::theta];
+    T_PR * const AMREX_RESTRICT theta1 = soa_1.rdata(PIdx::theta);
+    T_PR * const AMREX_RESTRICT theta2 = soa_2.rdata(PIdx::theta);
 #endif
 
     // call UpdateMomentumPerezElastic()

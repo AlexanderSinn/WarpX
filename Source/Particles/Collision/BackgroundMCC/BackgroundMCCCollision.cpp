@@ -358,7 +358,7 @@ void BackgroundMCCCollision::doBackgroundCollisionsWithinTile
     auto GetPosition = GetParticlePosition<PIdx>(pti);
 
     // get Struct-Of-Array particle data, also called attribs
-    auto& attribs = pti.GetAttribs();
+    const auto& attribs = pti.GetAttribs();
     amrex::ParticleReal* const AMREX_RESTRICT ux = attribs[PIdx::ux].dataPtr();
     amrex::ParticleReal* const AMREX_RESTRICT uy = attribs[PIdx::uy].dataPtr();
     amrex::ParticleReal* const AMREX_RESTRICT uz = attribs[PIdx::uz].dataPtr();

@@ -93,7 +93,7 @@ FieldProbeParticleContainer::AddNParticles (int lev,
      * is then coppied to the permament tile which is stored on the particle
      * (particle_tile).
      */
-    using PinnedTile = typename ContainerLike<amrex::PinnedArenaAllocator>::ParticleTileType;
+    using PinnedTile = typename ParticleContainerType::ParticleTileType;
 
     PinnedTile pinned_tile;
     pinned_tile.define(NumRuntimeRealComps(), NumRuntimeIntComps());

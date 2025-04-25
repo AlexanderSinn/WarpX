@@ -68,12 +68,12 @@ namespace {
         amrex::ParticleReal ux2_out = 0.0_prt, uy2_out = 0.0_prt, uz2_out = 0.0_prt;
 
         TwoProductFusionComputeProductMomenta(
-            soa1_in.m_rdata[PIdx::ux][idx1_in],
-            soa1_in.m_rdata[PIdx::uy][idx1_in],
-            soa1_in.m_rdata[PIdx::uz][idx1_in], m1_in,
-            soa2_in.m_rdata[PIdx::ux][idx2_in],
-            soa2_in.m_rdata[PIdx::uy][idx2_in],
-            soa2_in.m_rdata[PIdx::uz][idx2_in], m2_in,
+            soa1_in.rdata(PIdx::ux)[idx1_in],
+            soa1_in.rdata(PIdx::uy)[idx1_in],
+            soa1_in.rdata(PIdx::uz)[idx1_in], m1_in,
+            soa2_in.rdata(PIdx::ux)[idx2_in],
+            soa2_in.rdata(PIdx::uy)[idx2_in],
+            soa2_in.rdata(PIdx::uz)[idx2_in], m2_in,
             ux1_out, uy1_out, uz1_out, m1_out,
             ux2_out, uy2_out, uz2_out, m2_out,
             E_fusion,
@@ -81,18 +81,18 @@ namespace {
 
         // Fill momentum of product species (note that we actually
         // create 4 products, 2 at the position of each incident particle)
-        soa1_out.m_rdata[PIdx::ux][idx1_out_start] = ux1_out;
-        soa1_out.m_rdata[PIdx::uy][idx1_out_start] = uy1_out;
-        soa1_out.m_rdata[PIdx::uz][idx1_out_start] = uz1_out;
-        soa1_out.m_rdata[PIdx::ux][idx1_out_start + 1] = ux1_out;
-        soa1_out.m_rdata[PIdx::uy][idx1_out_start + 1] = uy1_out;
-        soa1_out.m_rdata[PIdx::uz][idx1_out_start + 1] = uz1_out;
-        soa2_out.m_rdata[PIdx::ux][idx2_out_start] = ux2_out;
-        soa2_out.m_rdata[PIdx::uy][idx2_out_start] = uy2_out;
-        soa2_out.m_rdata[PIdx::uz][idx2_out_start] = uz2_out;
-        soa2_out.m_rdata[PIdx::ux][idx2_out_start + 1] = ux2_out;
-        soa2_out.m_rdata[PIdx::uy][idx2_out_start + 1] = uy2_out;
-        soa2_out.m_rdata[PIdx::uz][idx2_out_start + 1] = uz2_out;
+        soa1_out.rdata(PIdx::ux)[idx1_out_start] = ux1_out;
+        soa1_out.rdata(PIdx::uy)[idx1_out_start] = uy1_out;
+        soa1_out.rdata(PIdx::uz)[idx1_out_start] = uz1_out;
+        soa1_out.rdata(PIdx::ux)[idx1_out_start + 1] = ux1_out;
+        soa1_out.rdata(PIdx::uy)[idx1_out_start + 1] = uy1_out;
+        soa1_out.rdata(PIdx::uz)[idx1_out_start + 1] = uz1_out;
+        soa2_out.rdata(PIdx::ux)[idx2_out_start] = ux2_out;
+        soa2_out.rdata(PIdx::uy)[idx2_out_start] = uy2_out;
+        soa2_out.rdata(PIdx::uz)[idx2_out_start] = uz2_out;
+        soa2_out.rdata(PIdx::ux)[idx2_out_start + 1] = ux2_out;
+        soa2_out.rdata(PIdx::uy)[idx2_out_start + 1] = uy2_out;
+        soa2_out.rdata(PIdx::uz)[idx2_out_start + 1] = uz2_out;
     }
 }
 

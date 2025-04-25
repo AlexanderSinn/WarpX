@@ -137,7 +137,7 @@ void ParticleMomentum::ComputeDiags (int step)
         // but ux, uy, uz are calculated assuming a mass equal to the electron mass)
         const amrex::Real m = (myspc.AmIA<PhysicalSpecies::photon>()) ? PhysConst::m_e : myspc.getMass();
 
-        using PType = typename WarpXParticleContainer::SuperParticleType;
+        using PType = typename WarpXParticleContainer::ConstParticleType;
 
         // Use amrex::ParticleReduce to compute the sum of the momenta and weights of all particles
         // held by the current MPI rank for this species (loop over all boxes held by this MPI rank):

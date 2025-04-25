@@ -143,23 +143,23 @@ struct LorentzTransformParticles
         const amrex::ParticleReal uzp = uz_old_p * weight_old
                                       + uz_new_p * weight_new;
 #if defined (WARPX_DIM_3D)
-        dst.m_rdata[PIdx::x][i_dst] = xp;
-        dst.m_rdata[PIdx::y][i_dst] = yp;
-        dst.m_rdata[PIdx::z][i_dst] = zp;
+        dst.rdata(PIdx::x)[i_dst] = xp;
+        dst.rdata(PIdx::y)[i_dst] = yp;
+        dst.rdata(PIdx::z)[i_dst] = zp;
 #elif defined (WARPX_DIM_RZ)
-        dst.m_rdata[PIdx::x][i_dst] = std::sqrt(xp*xp + yp*yp);
-        dst.m_rdata[PIdx::z][i_dst] = zp;
-        dst.m_rdata[PIdx::theta][i_dst] = std::atan2(yp, xp);
+        dst.rdata(PIdx::x)[i_dst] = std::sqrt(xp*xp + yp*yp);
+        dst.rdata(PIdx::z)[i_dst] = zp;
+        dst.rdata(PIdx::theta)[i_dst] = std::atan2(yp, xp);
 #elif defined (WARPX_DIM_XZ)
-        dst.m_rdata[PIdx::x][i_dst] = xp;
-        dst.m_rdata[PIdx::z][i_dst] = zp;
+        dst.rdata(PIdx::x)[i_dst] = xp;
+        dst.rdata(PIdx::z)[i_dst] = zp;
 #elif defined (WARPX_DIM_1D_Z)
-        dst.m_rdata[PIdx::z][i_dst] = zp;
+        dst.rdata(PIdx::z)[i_dst] = zp;
 #endif
-        dst.m_rdata[PIdx::w][i_dst] = m_wpnew[i_src];
-        dst.m_rdata[PIdx::ux][i_dst] = uxp;
-        dst.m_rdata[PIdx::uy][i_dst] = uyp;
-        dst.m_rdata[PIdx::uz][i_dst] = uzp;
+        dst.rdata(PIdx::w)[i_dst] = m_wpnew[i_src];
+        dst.rdata(PIdx::ux)[i_dst] = uxp;
+        dst.rdata(PIdx::uy)[i_dst] = uyp;
+        dst.rdata(PIdx::uz)[i_dst] = uzp;
     }
 
     amrex::Real m_t_boost;

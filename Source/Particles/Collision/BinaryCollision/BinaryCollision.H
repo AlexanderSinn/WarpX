@@ -443,7 +443,7 @@ public:
                     // compute local density [1/m^3]
                     if (binary_collision_functor.m_computeSpeciesDensities) {
                         amrex::ParticleReal wtot1 = 0.0;
-                        amrex::ParticleReal * const AMREX_RESTRICT w1 = soa_1.m_rdata[PIdx::w];
+                        amrex::ParticleReal * const AMREX_RESTRICT w1 = soa_1.rdata(PIdx::w);
                         for (index_type i1=cell_start_1; i1<cell_stop_1; ++i1) {
                             wtot1 += w1[ indices_1[i1] ];
                         }
@@ -453,10 +453,10 @@ public:
 
                     // compute local temperature [Joules]
                     if (binary_collision_functor.m_computeSpeciesTemperatures) {
-                        amrex::ParticleReal * const AMREX_RESTRICT w1  = soa_1.m_rdata[PIdx::w];
-                        amrex::ParticleReal * const AMREX_RESTRICT u1x = soa_1.m_rdata[PIdx::ux];
-                        amrex::ParticleReal * const AMREX_RESTRICT u1y = soa_1.m_rdata[PIdx::uy];
-                        amrex::ParticleReal * const AMREX_RESTRICT u1z = soa_1.m_rdata[PIdx::uz];
+                        amrex::ParticleReal * const AMREX_RESTRICT w1  = soa_1.rdata(PIdx::w);
+                        amrex::ParticleReal * const AMREX_RESTRICT u1x = soa_1.rdata(PIdx::ux);
+                        amrex::ParticleReal * const AMREX_RESTRICT u1y = soa_1.rdata(PIdx::uy);
+                        amrex::ParticleReal * const AMREX_RESTRICT u1z = soa_1.rdata(PIdx::uz);
                         T1_in_each_cell[i_cell] = ComputeTemperature( cell_start_1, cell_stop_1, indices_1,
                                                                       w1, u1x, u1y, u1z, m1 );
                     }
@@ -690,8 +690,8 @@ public:
                     if (binary_collision_functor.m_computeSpeciesDensities) {
                         amrex::ParticleReal w1tot = 0.0;
                         amrex::ParticleReal w2tot = 0.0;
-                        amrex::ParticleReal * const AMREX_RESTRICT w1 = soa_1.m_rdata[PIdx::w];
-                        amrex::ParticleReal * const AMREX_RESTRICT w2 = soa_2.m_rdata[PIdx::w];
+                        amrex::ParticleReal * const AMREX_RESTRICT w1 = soa_1.rdata(PIdx::w);
+                        amrex::ParticleReal * const AMREX_RESTRICT w2 = soa_2.rdata(PIdx::w);
                         for (index_type i1=cell_start_1; i1<cell_stop_1; ++i1) {
                             w1tot += w1[ indices_1[i1] ];
                         }
@@ -704,17 +704,17 @@ public:
 
                     // compute local temperatures [Joules]
                     if (binary_collision_functor.m_computeSpeciesTemperatures) {
-                        amrex::ParticleReal * const AMREX_RESTRICT w1  = soa_1.m_rdata[PIdx::w];
-                        amrex::ParticleReal * const AMREX_RESTRICT u1x = soa_1.m_rdata[PIdx::ux];
-                        amrex::ParticleReal * const AMREX_RESTRICT u1y = soa_1.m_rdata[PIdx::uy];
-                        amrex::ParticleReal * const AMREX_RESTRICT u1z = soa_1.m_rdata[PIdx::uz];
+                        amrex::ParticleReal * const AMREX_RESTRICT w1  = soa_1.rdata(PIdx::w);
+                        amrex::ParticleReal * const AMREX_RESTRICT u1x = soa_1.rdata(PIdx::ux);
+                        amrex::ParticleReal * const AMREX_RESTRICT u1y = soa_1.rdata(PIdx::uy);
+                        amrex::ParticleReal * const AMREX_RESTRICT u1z = soa_1.rdata(PIdx::uz);
                         T1_in_each_cell[i_cell] = ComputeTemperature( cell_start_1, cell_stop_1, indices_1,
                                                                       w1, u1x, u1y, u1z, m1 );
 
-                        amrex::ParticleReal * const AMREX_RESTRICT w2  = soa_2.m_rdata[PIdx::w];
-                        amrex::ParticleReal * const AMREX_RESTRICT u2x = soa_2.m_rdata[PIdx::ux];
-                        amrex::ParticleReal * const AMREX_RESTRICT u2y = soa_2.m_rdata[PIdx::uy];
-                        amrex::ParticleReal * const AMREX_RESTRICT u2z = soa_2.m_rdata[PIdx::uz];
+                        amrex::ParticleReal * const AMREX_RESTRICT w2  = soa_2.rdata(PIdx::w);
+                        amrex::ParticleReal * const AMREX_RESTRICT u2x = soa_2.rdata(PIdx::ux);
+                        amrex::ParticleReal * const AMREX_RESTRICT u2y = soa_2.rdata(PIdx::uy);
+                        amrex::ParticleReal * const AMREX_RESTRICT u2z = soa_2.rdata(PIdx::uz);
                         T2_in_each_cell[i_cell] = ComputeTemperature( cell_start_2, cell_stop_2, indices_2,
                                                                       w2, u2x, u2y, u2z, m2 );
                     }

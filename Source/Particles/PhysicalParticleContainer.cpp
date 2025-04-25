@@ -806,7 +806,7 @@ PhysicalParticleContainer::AddPlasmaFromFile(PlasmaInjector & plasma_injector,
 
 void
 PhysicalParticleContainer::DefaultInitializeRuntimeAttributes (
-    typename ContainerLike<amrex::PinnedArenaAllocator>::ParticleTileType& pinned_tile,
+    typename ParticleContainerType::ParticleTileType& pinned_tile,
     int n_external_attr_real,
     int n_external_attr_int)
 {
@@ -1854,7 +1854,7 @@ PhysicalParticleContainer::Evolve (ablastr::fields::MultiFabRegister& fields,
             const Box& box = pti.validbox();
 
             // Extract particle data
-            auto& attribs = pti.GetAttribs();
+            const auto& attribs = pti.GetAttribs();
             auto&  wp = attribs[PIdx::w];
             auto& uxp = attribs[PIdx::ux];
             auto& uyp = attribs[PIdx::uy];
@@ -2191,7 +2191,7 @@ PhysicalParticleContainer::SplitParticles (int lev)
             split_offset[2] /= ppc_nd[2];
         }
         // particle Struct Of Arrays data
-        auto& attribs = pti.GetAttribs();
+        const auto& attribs = pti.GetAttribs();
         auto& wp  = attribs[PIdx::w ];
         auto& uxp = attribs[PIdx::ux];
         auto& uyp = attribs[PIdx::uy];
@@ -2413,7 +2413,7 @@ PhysicalParticleContainer::PushP (int lev, Real dt,
             amrex::IndexType const by_type = byfab.box().ixType();
             amrex::IndexType const bz_type = bzfab.box().ixType();
 
-            auto& attribs = pti.GetAttribs();
+            const auto& attribs = pti.GetAttribs();
             ParticleReal* const AMREX_RESTRICT ux = attribs[PIdx::ux].dataPtr();
             ParticleReal* const AMREX_RESTRICT uy = attribs[PIdx::uy].dataPtr();
             ParticleReal* const AMREX_RESTRICT uz = attribs[PIdx::uz].dataPtr();
@@ -2603,7 +2603,7 @@ PhysicalParticleContainer::PushPX (WarpXParIter& pti,
     amrex::IndexType const by_type = byfab->box().ixType();
     amrex::IndexType const bz_type = bzfab->box().ixType();
 
-    auto& attribs = pti.GetAttribs();
+    const auto& attribs = pti.GetAttribs();
     ParticleReal* const AMREX_RESTRICT ux = attribs[PIdx::ux].dataPtr() + offset;
     ParticleReal* const AMREX_RESTRICT uy = attribs[PIdx::uy].dataPtr() + offset;
     ParticleReal* const AMREX_RESTRICT uz = attribs[PIdx::uz].dataPtr() + offset;
@@ -2849,7 +2849,7 @@ PhysicalParticleContainer::ImplicitPushXP (WarpXParIter& pti,
     amrex::IndexType const by_type = byfab->box().ixType();
     amrex::IndexType const bz_type = bzfab->box().ixType();
 
-    auto& attribs = pti.GetAttribs();
+    const auto& attribs = pti.GetAttribs();
     ParticleReal* const AMREX_RESTRICT ux = attribs[PIdx::ux].dataPtr() + offset;
     ParticleReal* const AMREX_RESTRICT uy = attribs[PIdx::uy].dataPtr() + offset;
     ParticleReal* const AMREX_RESTRICT uz = attribs[PIdx::uz].dataPtr() + offset;

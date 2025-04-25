@@ -234,7 +234,7 @@ WarpX::SaveParticlesAtImplicitStepStart ( )
 
                 const auto getPosition = GetParticlePosition(pti);
 
-                auto& attribs = pti.GetAttribs();
+                const auto& attribs = pti.GetAttribs();
                 amrex::ParticleReal* const AMREX_RESTRICT ux = attribs[PIdx::ux].dataPtr();
                 amrex::ParticleReal* const AMREX_RESTRICT uy = attribs[PIdx::uy].dataPtr();
                 amrex::ParticleReal* const AMREX_RESTRICT uz = attribs[PIdx::uz].dataPtr();
@@ -305,7 +305,7 @@ WarpX::FinishImplicitParticleUpdate ()
                 const auto getPosition = GetParticlePosition(pti);
                 const auto setPosition = SetParticlePosition(pti);
 
-                auto& attribs = pti.GetAttribs();
+                const auto& attribs = pti.GetAttribs();
                 amrex::ParticleReal* const AMREX_RESTRICT ux = attribs[PIdx::ux].dataPtr();
                 amrex::ParticleReal* const AMREX_RESTRICT uy = attribs[PIdx::uy].dataPtr();
                 amrex::ParticleReal* const AMREX_RESTRICT uz = attribs[PIdx::uz].dataPtr();

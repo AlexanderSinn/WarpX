@@ -68,7 +68,7 @@ public:
         using namespace amrex;
 
         const amrex::ParticleReal opt_depth =
-            ptd.m_runtime_rdata[m_opt_depth_runtime_comp][i];
+            ptd.rdata(PIdx::nattribs + m_opt_depth_runtime_comp)[i];
         return (opt_depth < 0.0_rt);
     }
 
@@ -159,12 +159,12 @@ public:
                        m_dinv, m_xyzmin, m_lo, m_n_rz_azimuthal_modes,
                        m_nox, m_galerkin_interpolation);
 
-        auto& ux = src.m_rdata[PIdx::ux][i_src];
-        auto& uy = src.m_rdata[PIdx::uy][i_src];
-        auto& uz = src.m_rdata[PIdx::uz][i_src];
-        auto& g_ux = dst.m_rdata[PIdx::ux][i_dst];
-        auto& g_uy = dst.m_rdata[PIdx::uy][i_dst];
-        auto& g_uz = dst.m_rdata[PIdx::uz][i_dst];
+        auto& ux = src.rdata(PIdx::ux)[i_src];
+        auto& uy = src.rdata(PIdx::uy)[i_src];
+        auto& uz = src.rdata(PIdx::uz)[i_src];
+        auto& g_ux = dst.rdata(PIdx::ux)[i_dst];
+        auto& g_uy = dst.rdata(PIdx::uy)[i_dst];
+        auto& g_uz = dst.rdata(PIdx::uz)[i_dst];
         m_emission_functor(
             ux, uy, uz,
             ex, ey, ez,
@@ -173,7 +173,7 @@ public:
             engine);
 
         //Initialize the optical depth component of the source species.
-        src.m_runtime_rdata[m_opt_depth_runtime_comp][i_src] =
+        src.rdata(PIdx::nattribs + m_opt_depth_runtime_comp)[i_src] =
             m_opt_depth_functor(engine);
     }
 

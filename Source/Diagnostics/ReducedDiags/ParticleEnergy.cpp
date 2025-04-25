@@ -107,7 +107,7 @@ void ParticleEnergy::ComputeDiags (int step)
         // Get mass (used only for particles other than photons, see below)
         const amrex::Real m = myspc.getMass();
 
-        using PType = typename WarpXParticleContainer::SuperParticleType;
+        using PType = typename WarpXParticleContainer::ConstParticleType;
 
         amrex::Real Etot = 0.0_rt;
         amrex::Real Ws   = 0.0_rt;

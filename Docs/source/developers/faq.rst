@@ -81,7 +81,7 @@ We need pinned aka "page locked" host memory when we:
 - want to write to CPU memory from a GPU kernel
 
 A typical use case is initialization of our (filtered/processed) output routines.
-AMReX provides pinned memory via the ``amrex::PinnedArenaAllocator`` , which is the last argument passed to constructors of ``ParticleContainer`` and ``MultiFab``.
+AMReX provides pinned memory via the ``amrex::PolymorphicArenaAllocator`` , which is the last argument passed to constructors of ``ParticleContainer`` and ``MultiFab``.
 
 Read more on this here: `How to Optimize Data Transfers in CUDA C/C++ <https://developer.nvidia.com/blog/how-optimize-data-transfers-cuda-cc/>`__ (note that pinned memory is a host memory feature and works with all GPU vendors we support)
 

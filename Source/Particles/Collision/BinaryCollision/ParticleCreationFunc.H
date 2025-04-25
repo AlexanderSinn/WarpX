@@ -186,9 +186,9 @@ public:
                                       static_cast<int>(product_index + 1), engine);
 
                         // Set the weight of the new particles to p_pair_reaction_weight[i]/2
-                        soa_products_data[j].m_rdata[PIdx::w][product_index] =
+                        soa_products_data[j].rdata(PIdx::w)[product_index] =
                                                 p_pair_reaction_weight[i]/amrex::ParticleReal(2.);
-                        soa_products_data[j].m_rdata[PIdx::w][product_index + 1] =
+                        soa_products_data[j].rdata(PIdx::w)[product_index + 1] =
                                                 p_pair_reaction_weight[i]/amrex::ParticleReal(2.);
                     }
                 }

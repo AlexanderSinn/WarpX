@@ -188,7 +188,7 @@ void BeamRelevant::ComputeDiags (int step)
         ParticleReal const m = myspc.getMass();
         ParticleReal const q = myspc.getCharge();
 
-        using PType = typename WarpXParticleContainer::SuperParticleType;
+        using PType = typename WarpXParticleContainer::ConstParticleType;
 
         // number of reduction operations in first concurrent batch
         constexpr size_t num_red_ops_1 = 8;

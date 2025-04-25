@@ -49,34 +49,28 @@ struct SmartCreate
         const int id = 0) const noexcept
     {
 #if defined(WARPX_DIM_3D)
-        prt.m_rdata[PIdx::x][i_prt] = x;
-        prt.m_rdata[PIdx::y][i_prt] = y;
-        prt.m_rdata[PIdx::z][i_prt] = z;
+        prt.rdata(PIdx::x)[i_prt] = x;
+        prt.rdata(PIdx::y)[i_prt] = y;
+        prt.rdata(PIdx::z)[i_prt] = z;
 #elif defined(WARPX_DIM_XZ) || defined(WARPX_DIM_RZ)
-        prt.m_rdata[PIdx::x][i_prt] = x;
-        prt.m_rdata[PIdx::z][i_prt] = z;
+        prt.rdata(PIdx::x)[i_prt] = x;
+        prt.rdata(PIdx::z)[i_prt] = z;
         amrex::ignore_unused(y);
 #else
-        prt.m_rdata[PIdx::z][i_prt] = z;
+        prt.rdata(PIdx::z)[i_prt] = z;
         amrex::ignore_unused(x,y);
 #endif
 
         prt.m_idcpu[i_prt] = amrex::SetParticleIDandCPU(id, cpu);
 
         // initialize the real components after position
-        for (int j = AMREX_SPACEDIM; j < PartData::NAR; ++j) {
-            prt.m_rdata[j][i_prt] = initializeRealValue(m_policy_real[j], engine);
-        }
-        for (int j = 0; j < prt.m_num_runtime_real; ++j) {
-            prt.m_runtime_rdata[j][i_prt] = initializeRealValue(m_policy_real[j+PartData::NAR], engine);
+        for (int j = AMREX_SPACEDIM; j < prt.m_n_real; ++j) {
+            prt.rdata(j)[i_prt] = initializeRealValue(m_policy_real[j], engine);
         }
 
         // initialize the int components
-        for (int j = 0; j < PartData::NAI; ++j) {
-            prt.m_idata[j][i_prt] = initializeIntValue(m_policy_int[j]);
-        }
-        for (int j = 0; j < prt.m_num_runtime_int; ++j) {
-            prt.m_runtime_idata[j][i_prt] = initializeIntValue(m_policy_int[j+PartData::NAI]);
+        for (int j = 0; j < prt.m_n_int; ++j) {
+            prt.idata(j)[i_prt] = initializeIntValue(m_policy_int[j]);
         }
     }
 };

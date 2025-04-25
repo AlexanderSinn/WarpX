@@ -361,8 +361,8 @@ FlushFormatPlotfile::WriteParticles(const std::string& dir,
         WarpXParticleContainer* pc = part_diag.getParticleContainer();
         PinnedMemoryParticleContainer* pinned_pc = part_diag.getPinnedParticleContainer();
         auto tmp = isBTD ?
-            pinned_pc->make_alike<amrex::PinnedArenaAllocator>() :
-            pc->make_alike<amrex::PinnedArenaAllocator>();
+            pinned_pc->make_alike<amrex::PolymorphicArenaAllocator>() :
+            pc->make_alike<amrex::PolymorphicArenaAllocator>();
 
         Vector<std::string> real_names;
         Vector<std::string> int_names;
@@ -433,7 +433,7 @@ FlushFormatPlotfile::WriteParticles(const std::string& dir,
                               AMREX_GPU_HOST_DEVICE
                               (const SrcData& src, int ip, const amrex::RandomEngine& engine)
             {
-                const SuperParticleType& p = src.getSuperParticle(ip);
+                const auto p = src[ip];
                 return random_filter(p, engine) * uniform_filter(p, engine)
                     * parser_filter(p, engine) * geometry_filter(p, engine);
             }, true);

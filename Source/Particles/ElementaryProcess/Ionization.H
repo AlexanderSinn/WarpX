@@ -96,7 +96,7 @@ struct IonizationFilterFunc
     {
         using namespace amrex::literals;
 
-        const int ion_lev = ptd.m_runtime_idata[comp][i];
+        const int ion_lev = ptd.idata(comp)[i];
         if (ion_lev < m_atomic_number)
         {
             constexpr amrex::Real c = PhysConst::c;
@@ -122,9 +122,9 @@ struct IonizationFilterFunc
 
             // Compute electric field amplitude in the particle's frame of
             // reference (particularly important when in boosted frame).
-            const amrex::ParticleReal ux = ptd.m_rdata[PIdx::ux][i];
-            const amrex::ParticleReal uy = ptd.m_rdata[PIdx::uy][i];
-            const amrex::ParticleReal uz = ptd.m_rdata[PIdx::uz][i];
+            const amrex::ParticleReal ux = ptd.rdata(PIdx::ux)[i];
+            const amrex::ParticleReal uy = ptd.rdata(PIdx::uy)[i];
+            const amrex::ParticleReal uz = ptd.rdata(PIdx::uz)[i];
 
             const auto ga = static_cast<amrex::Real>(
                 std::sqrt(1. + (ux*ux + uy*uy + uz*uz) * c2_inv));
@@ -166,7 +166,7 @@ struct IonizationTransformFunc
         int i_src, int /*i_dst*/,
         amrex::RandomEngine const& /*engine*/) const noexcept
     {
-        src.m_runtime_idata[0][i_src] += 1;
+        src.idata(0)[i_src] += 1;
     }
 };
 

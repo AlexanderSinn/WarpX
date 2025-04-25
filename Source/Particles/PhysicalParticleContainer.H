@@ -230,7 +230,7 @@ public:
      * @param[in] engine the random engine, used in initialization of QED optical depths
      */
     void DefaultInitializeRuntimeAttributes (
-        typename ContainerLike<amrex::PinnedArenaAllocator>::ParticleTileType& pinned_tile,
+        typename ParticleContainerType::ParticleTileType& pinned_tile,
         int n_external_attr_real,
         int n_external_attr_int) final;
 

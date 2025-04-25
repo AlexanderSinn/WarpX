@@ -185,7 +185,7 @@ void ParticleExtrema::ComputeDiags (int step)
             m = PhysConst::m_e;
         }
 
-        using PType = typename WarpXParticleContainer::SuperParticleType;
+        using PType = typename WarpXParticleContainer::ConstParticleType;
         using OpMin = amrex::ReduceOpMin;
         using OpMax = amrex::ReduceOpMax;
 

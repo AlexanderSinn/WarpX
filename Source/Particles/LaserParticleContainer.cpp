@@ -609,7 +609,7 @@ LaserParticleContainer::Evolve (ablastr::fields::MultiFabRegister& fields,
             }
             Real wt = static_cast<Real>(amrex::second());
 
-            auto& attribs = pti.GetAttribs();
+            const auto& attribs = pti.GetAttribs();
 
             auto&  wp = attribs[PIdx::w ];
             auto& uxp = attribs[PIdx::ux];

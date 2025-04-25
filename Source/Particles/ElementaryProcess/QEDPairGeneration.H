@@ -62,7 +62,7 @@ public:
         using namespace amrex;
 
         const amrex::ParticleReal opt_depth =
-            ptd.m_runtime_rdata[m_opt_depth_runtime_comp][i];
+            ptd.rdata(PIdx::nattribs + m_opt_depth_runtime_comp)[i];
         return (opt_depth < 0.0_rt);
     }
 
@@ -150,15 +150,15 @@ public:
         //Despite the names of the variables, positrons and electrons
         //can be exchanged, since the physical process is completely
         //symmetric with respect to this exchange.
-        const auto& ux = src.m_rdata[PIdx::ux][i_src];
-        const auto& uy = src.m_rdata[PIdx::uy][i_src];
-        const auto& uz = src.m_rdata[PIdx::uz][i_src];
-        auto& e_ux = dst1.m_rdata[PIdx::ux][i_dst1];
-        auto& e_uy = dst1.m_rdata[PIdx::uy][i_dst1];
-        auto& e_uz = dst1.m_rdata[PIdx::uz][i_dst1];
-        auto& p_ux = dst2.m_rdata[PIdx::ux][i_dst2];
-        auto& p_uy = dst2.m_rdata[PIdx::uy][i_dst2];
-        auto& p_uz = dst2.m_rdata[PIdx::uz][i_dst2];
+        const auto& ux = src.rdata(PIdx::ux)[i_src];
+        const auto& uy = src.rdata(PIdx::uy)[i_src];
+        const auto& uz = src.rdata(PIdx::uz)[i_src];
+        auto& e_ux = dst1.rdata(PIdx::ux)[i_dst1];
+        auto& e_uy = dst1.rdata(PIdx::uy)[i_dst1];
+        auto& e_uz = dst1.rdata(PIdx::uz)[i_dst1];
+        auto& p_ux = dst2.rdata(PIdx::ux)[i_dst2];
+        auto& p_uy = dst2.rdata(PIdx::uy)[i_dst2];
+        auto& p_uz = dst2.rdata(PIdx::uz)[i_dst2];
         m_generate_functor(
             ux, uy, uz,
             ex, ey, ez,

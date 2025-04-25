@@ -144,7 +144,7 @@ BackTransformParticleFunctor::operator () (PinnedMemoryParticleContainer& pc_dst
                 auto& ptile_dst = pc_dst.DefineAndReturnParticleTile(lev, pti.index(), pti.LocalTileIndex() );
                 auto old_size = ptile_dst.numParticles();
                 ptile_dst.resize(old_size + total_partdiag_size);
-                amrex::filterParticles(ptile_dst, ptile_src, GetParticleFilter, 0, old_size, np);
+                amrex::filterParticles(ptile_dst, ptile_src, GetParticleFilter, std::size_t{0}, old_size, np);
                 auto dst_data = ptile_dst.getParticleTileData();
                 amrex::ParallelFor(np,
                 [=] AMREX_GPU_DEVICE(int i)

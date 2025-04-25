@@ -49,19 +49,13 @@ struct SmartCopy
                      amrex::RandomEngine const& engine) const noexcept
     {
         // initialize the real components
-        for (int j = 0; j < DstData::NAR; ++j) {
-            dst.m_rdata[j][i_dst] = initializeRealValue(m_policy_real[j], engine);
-        }
-        for (int j = 0; j < dst.m_num_runtime_real; ++j) {
-            dst.m_runtime_rdata[j][i_dst] = initializeRealValue(m_policy_real[j+DstData::NAR], engine);
+        for (int j = 0; j < dst.m_n_real; ++j) {
+            dst.rdata(j)[i_dst] = initializeRealValue(m_policy_real[j], engine);
         }
 
         // initialize the int components
-        for (int j = 0; j < DstData::NAI; ++j) {
-            dst.m_idata[j][i_dst] = initializeIntValue(m_policy_int[j]);
-        }
-        for (int j = 0; j < dst.m_num_runtime_int; ++j) {
-            dst.m_runtime_idata[j][i_dst] = initializeIntValue(m_policy_int[j+DstData::NAI]);
+        for (int j = 0; j < dst.m_n_int; ++j) {
+            dst.idata(j)[i_dst] = initializeIntValue(m_policy_int[j]);
         }
 
         // copy the shared real components
@@ -71,31 +65,11 @@ struct SmartCopy
             amrex::ParticleReal* AMREX_RESTRICT dst_data;
             const amrex::ParticleReal* AMREX_RESTRICT src_data;
 
-            if (m_src_comps_r[j] < SrcData::NAR)
-            {
-                // This is a compile-time attribute of the src
-                src_comp = m_src_comps_r[j];
-                src_data = src.m_rdata[src_comp];
-            }
-            else
-            {
-                // This is a runtime attribute of the src
-                src_comp = m_src_comps_r[j] - SrcData::NAR;
-                src_data = src.m_runtime_rdata[src_comp];
-            }
+            src_comp = m_src_comps_r[j];
+            src_data = src.rdata(src_comp);
 
-            if (m_dst_comps_r[j] < DstData::NAR)
-            {
-                // This is a compile-time attribute of the dst
-                dst_comp = m_dst_comps_r[j];
-                dst_data = dst.m_rdata[dst_comp];
-            }
-            else
-            {
-                // This is a runtime attribute of the dst
-                dst_comp = m_dst_comps_r[j] - DstData::NAR;
-                dst_data = dst.m_runtime_rdata[dst_comp];
-            }
+            dst_comp = m_dst_comps_r[j];
+            dst_data = dst.rdata(dst_comp);
 
             dst_data[i_dst] = src_data[i_src];
         }
@@ -105,17 +79,13 @@ struct SmartCopy
         {
             int src_comp, dst_comp;
             int* AMREX_RESTRICT dst_data;
-            int* AMREX_RESTRICT src_data;
-
-            // note, in WarpX we only have runtime int data
-            static_assert(SrcData::NAI == 0 && DstData::NAI == 0,
-                          "SmartCopy assumes all int data is runtime-added.");
+            const int* AMREX_RESTRICT src_data;
 
             src_comp = m_src_comps_i[j];
-            src_data = src.m_runtime_idata[src_comp];
+            src_data = src.idata(src_comp);
 
             dst_comp = m_dst_comps_i[j];
-            dst_data = dst.m_runtime_idata[dst_comp];
+            dst_data = dst.idata(dst_comp);
 
             dst_data[i_dst] = src_data[i_src];
         }
