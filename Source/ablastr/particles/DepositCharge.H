@@ -79,8 +79,9 @@ deposit_charge (typename T_PC::ParIterType& pti,
     if (!np_to_deposit.has_value()) {
         np_to_deposit = pti.numParticles();
     }
-    ABLASTR_ALWAYS_ASSERT_WITH_MESSAGE(np_to_deposit.value() + offset <= pti.numParticles(),
-                                       "np_to_deposit + offset are out-of-bounds for particle iterator");
+    ABLASTR_ALWAYS_ASSERT_WITH_MESSAGE(
+        np_to_deposit.value() + offset <= static_cast<long>(pti.numParticles()),
+        "np_to_deposit + offset are out-of-bounds for particle iterator");
 
     int const lev = pti.GetLevel();
     if (!depos_lev.has_value()) {

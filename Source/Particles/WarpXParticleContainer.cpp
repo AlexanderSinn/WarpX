@@ -215,83 +215,71 @@ WarpXParticleContainer::AddNParticles (int /*lev*/, long n,
 
     const std::size_t np = iend-ibegin;
 
-#if defined(WARPX_DIM_RZ) || defined(WARPX_DIM_RCYLINDER)
-    amrex::Vector<amrex::ParticleReal> r(np);
-    amrex::Vector<amrex::ParticleReal> theta(np);
-#elif defined(WARPX_DIM_RSPHERE)
-    amrex::Vector<amrex::ParticleReal> r(np);
-    amrex::Vector<amrex::ParticleReal> theta(np);
-    amrex::Vector<amrex::ParticleReal> phi(np);
-#endif
+    pinned_tile.resize(np);
+    auto ptd = pinned_tile.getParticleTileData();
 
-    for (auto i = ibegin; i < iend; ++i)
+    for (std::size_t i = 0; i < np; ++i)
     {
-        auto idcpu_data = pinned_tile.GetStructOfArrays().GetIdCPUData();
-
         amrex::Long current_id = id;  // copy input
         if (id == -1) {
             current_id = ParticleType::NextID();
         }
-        idcpu_data.push_back(amrex::SetParticleIDandCPU(current_id, ParallelDescriptor::MyProc()));
+
+        ptd.id(i) = current_id;
+        ptd.cpu(i) =  ParallelDescriptor::MyProc();
 
 #if defined(WARPX_DIM_RZ) || defined(WARPX_DIM_RCYLINDER)
-        r[i-ibegin] = std::sqrt(x[i]*x[i] + y[i]*y[i]);
-        theta[i-ibegin] = std::atan2(y[i], x[i]);
+        const amrex::ParticleReal r = std::sqrt(x[i+ibegin]*x[i+ibegin] + y[i+ibegin]*y[i+ibegin]);
+        const amrex::ParticleReal theta = std::atan2(y[i+ibegin], x[i+ibegin]);
 #elif defined(WARPX_DIM_RSPHERE)
-        r[i-ibegin] = std::sqrt(x[i]*x[i] + y[i]*y[i] + z[i]*z[i]);
-        theta[i-ibegin] = std::atan2(y[i], x[i]);
-        const amrex::ParticleReal rxy = std::sqrt(x[i]*x[i] + y[i]*y[i]);
-        phi[i-ibegin] = std::atan2(rxy, r[i-ibegin]);
+        const amrex::ParticleReal r =
+            std::sqrt(x[i+ibegin]*x[i+ibegin] + y[i+ibegin]*y[i+ibegin] + z[i+ibegin]*z[i+ibegin]);
+        const amrex::ParticleReal theta = std::atan2(y[i+ibegin], x[i+ibegin]);
+        const amrex::ParticleReal rxy = std::sqrt(x[i+ibegin]*x[i+ibegin]+y[i+ibegin]*y[i+ibegin]);
+        const amrex::ParticleReal phi = std::atan2(rxy, r);
 #endif
-    }
 
-    if (np > 0)
-    {
 #if defined(WARPX_DIM_3D)
-        pinned_tile.push_back_real(PIdx::x, x.data() + ibegin, x.data() + iend);
-        pinned_tile.push_back_real(PIdx::y, y.data() + ibegin, y.data() + iend);
-        pinned_tile.push_back_real(PIdx::z, z.data() + ibegin, z.data() + iend);
+        ptd.rdata(PIdx::x)[i] = x[i+ibegin];
+        ptd.rdata(PIdx::y)[i] = y[i+ibegin];
+        ptd.rdata(PIdx::z)[i] = z[i+ibegin];
 #elif defined(WARPX_DIM_XZ) || defined(WARPX_DIM_RZ)
         amrex::ignore_unused(y);
 #ifdef WARPX_DIM_RZ
-        pinned_tile.push_back_real(PIdx::x, r.data(), r.data() + np);
+        ptd.rdata(PIdx::x)[i] = r;
 #else
-        pinned_tile.push_back_real(PIdx::x, x.data() + ibegin, x.data() + iend);
+        ptd.rdata(PIdx::x)[i] = x[i+ibegin];
 #endif
-        pinned_tile.push_back_real(PIdx::z, z.data() + ibegin, z.data() + iend);
+        ptd.rdata(PIdx::z)[i] = z[i+ibegin];
 #elif defined(WARPX_DIM_1D_Z)
         amrex::ignore_unused(x,y);
-        pinned_tile.push_back_real(PIdx::z, z.data() + ibegin, z.data() + iend);
+        ptd.rdata(PIdx::z)[i] = z[i+ibegin];
 #elif defined(WARPX_DIM_RCYLINDER) || defined(WARPX_DIM_RSPHERE)
-        pinned_tile.push_back_real(PIdx::x, x.data() + ibegin, x.data() + iend);
+        ptd.rdata(PIdx::x)[i] = x[i+ibegin];
         amrex::ignore_unused(y,z);
 #endif
 
-        pinned_tile.push_back_real(PIdx::w, attr_real[0].data() + ibegin, attr_real[0].data() + iend);
-        pinned_tile.push_back_real(PIdx::ux, ux.data() + ibegin, ux.data() + iend);
-        pinned_tile.push_back_real(PIdx::uy, uy.data() + ibegin, uy.data() + iend);
-        pinned_tile.push_back_real(PIdx::uz, uz.data() + ibegin, uz.data() + iend);
-
-        if ( (NumRuntimeRealComps()>0) || (NumRuntimeIntComps()>0) ){
-            DefineAndReturnParticleTile(0, 0, 0);
-        }
+        ptd.rdata(PIdx::w)[i] = attr_real[0][i+ibegin];
+        ptd.rdata(PIdx::ux)[i] = ux[i+ibegin];
+        ptd.rdata(PIdx::uy)[i] = uy[i+ibegin];
+        ptd.rdata(PIdx::uz)[i] = uz[i+ibegin];
 
         for (int comp = PIdx::uz+1; comp < PIdx::nattribs; ++comp)
         {
 #if defined(WARPX_DIM_RZ) || defined(WARPX_DIM_RCYLINDER) || defined(WARPX_DIM_RSPHERE)
             if (comp == PIdx::theta) {
-                pinned_tile.push_back_real(comp, theta.data(), theta.data() + np);
+                ptd.rdata(PIdx::theta)[i] = theta;
             }
 #if defined(WARPX_DIM_RSPHERE)
             else if (comp == PIdx::phi) {
-                pinned_tile.push_back_real(comp, phi.data(), phi.data() + np);
+                ptd.rdata(PIdx::phi)[i] = phi;
             }
 #endif
             else {
-                pinned_tile.push_back_real(comp, np, 0.0_prt);
+                ptd.rdata(comp)[i] = 0.0_prt;
             }
 #else
-            pinned_tile.push_back_real(comp, np, 0.0_prt);
+            ptd.rdata(comp)[i] = 0.0_prt;
 #endif
         }
 
@@ -299,19 +287,19 @@ WarpXParticleContainer::AddNParticles (int /*lev*/, long n,
         for (int j = PIdx::nattribs; j < PIdx::nattribs + nattr_real - 1; ++j)
         {
             // get the next attribute from attr_real array
-            pinned_tile.push_back_real(
-                j, attr_real[j - PIdx::nattribs + 1].data() + ibegin, attr_real[j - PIdx::nattribs + 1].data() + iend
-            );
+            ptd.rdata(j)[i] = attr_real[j - PIdx::nattribs + 1][i+ibegin];
         }
 
         // Initialize nattr_int runtime integer attributes from data in the attr_int array
         for (int j = 0; j < nattr_int; ++j)
         {
             // get the next attribute from attr_int array
-            pinned_tile.push_back_int(j, attr_int[j].data() + ibegin, attr_int[j].data() + iend);
+            ptd.idata(j)[i] = attr_int[j][i+ibegin];
         }
+    }
 
-        pinned_tile.resize(np);
+    if (np > 0)
+    {
         // Default initialize the other real and integer runtime attributes
         DefaultInitializeRuntimeAttributes(pinned_tile, nattr_real - 1, nattr_int);
 
@@ -319,7 +307,7 @@ WarpXParticleContainer::AddNParticles (int /*lev*/, long n,
         auto new_np = old_np + pinned_tile.numParticles();
         particle_tile.resize(new_np);
         amrex::copyParticles(
-            particle_tile, pinned_tile, 0, old_np, pinned_tile.numParticles()
+            particle_tile, pinned_tile, decltype(old_np){0}, old_np, pinned_tile.numParticles()
         );
     }
 
@@ -1706,7 +1694,7 @@ WarpXParticleContainer::DepositTemperature (amrex::MultiFab* temperature, const 
     // average velocity squared <u - <u>>**2. This method is more robust than the
     // single step using <u**2> - <u>**2 when <u> >> u_rms.
     ParticleToMesh(*this, sum_mf, lev,
-            [=] AMREX_GPU_DEVICE (const WarpXParticleContainer::ParticleType& p,
+            [=] AMREX_GPU_DEVICE (const WarpXParticleContainer::ConstParticleType& p,
                 amrex::Array4<amrex::Real> const& sum_array,
                 amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> const& plo,
                 amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> const& dxi)
@@ -1829,7 +1817,7 @@ WarpXParticleContainer::DepositNumberDensity (amrex::MultiFab* number_density, c
 
     // Calculate the number density
     ParticleToMesh(*this, *number_density, lev,
-            [=] AMREX_GPU_DEVICE (const WarpXParticleContainer::ParticleType& p,
+            [=] AMREX_GPU_DEVICE (const WarpXParticleContainer::ConstParticleType& p,
                 amrex::Array4<amrex::Real> const& num_array,
                 amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> const& plo,
                 amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> const& dxi)
@@ -2044,10 +2032,11 @@ std::array<ParticleReal, 3> WarpXParticleContainer::meanParticleVelocity(bool lo
                 auto ux = pti.GetAttribs(PIdx::ux);
                 auto uy = pti.GetAttribs(PIdx::uy);
                 auto uz = pti.GetAttribs(PIdx::uz);
+                amrex::Long np = pti.numParticles();
 
-                np_total += pti.numParticles();
+                np_total += np;
 
-                for (unsigned long i = 0; i < ux.size(); i++) {
+                for (amrex::Long i = 0; i < np; i++) {
                     const amrex::ParticleReal usq = (ux[i]*ux[i] + uy[i]*uy[i] + uz[i]*uz[i])*inv_clight_sq;
                     const amrex::ParticleReal gaminv = 1.0_prt/std::sqrt(1.0_prt + usq);
                     vx_total += ux[i]*gaminv;

@@ -376,7 +376,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromDomainBoundaries (MultiParticleC
 {
     WARPX_PROFILE("ParticleBoundaryBuffer::gatherParticles");
 
-    using WarpXParIter = amrex::ParConstIterSoA2<>;
+    using PIter = amrex::ParConstIterSoA2<>;
     const auto& warpx_instance = WarpX::GetInstance();
     const amrex::Geometry& geom = warpx_instance.Geom(0);
     auto plo = geom.ProbLoArray();
@@ -403,7 +403,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromDomainBoundaries (MultiParticleC
 
                 auto& species_buffer = buffer[i];
                 for (int lev = 0; lev < pc.numLevels(); ++lev){
-                    for(WarpXParIter pti(pc, lev); pti.isValid(); ++pti){
+                    for(PIter pti(pc, lev); pti.isValid(); ++pti){
                         species_buffer.DefineAndReturnParticleTile(
                             lev, pti.index(), pti.LocalTileIndex());
                     }
@@ -411,7 +411,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromDomainBoundaries (MultiParticleC
 
                 for (int lev = 0; lev < pc.numLevels(); ++lev)
                 {
-                    for (WarpXParIter pti(pc, lev); pti.isValid(); ++pti) {
+                    for (PIter pti(pc, lev); pti.isValid(); ++pti) {
                         species_buffer.DefineAndReturnParticleTile(
                             lev, pti.index(), pti.LocalTileIndex());
                     }
@@ -420,7 +420,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromDomainBoundaries (MultiParticleC
 #ifdef AMREX_USE_OMP
 #pragma omp parallel if (amrex::Gpu::notInLaunchRegion())
 #endif
-                    for(WarpXParIter pti(pc, lev); pti.isValid(); ++pti)
+                    for(PIter pti(pc, lev); pti.isValid(); ++pti)
                     {
                         auto index = std::make_pair(pti.index(), pti.LocalTileIndex());
 
@@ -465,7 +465,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromDomainBoundaries (MultiParticleC
                           amrex::filterAndTransformParticles(ptile_buffer, ptile,
                                                              predicate,
                                                              CopyAndTimestamp{step_scraped_index, delta_index, normal_index, step, dt, idim, iside},
-                                                             0, dst_index);
+                                                             decltype(dst_index){0}, dst_index);
                         }
                     }
                 }
@@ -480,6 +480,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromEmbeddedBoundaries (
     if (EB::enabled()) {
         WARPX_PROFILE("ParticleBoundaryBuffer::gatherParticles::EB");
 
+        using PIter = amrex::ParConstIterSoA2<>;
         const auto &warpx_instance = WarpX::GetInstance();
         const amrex::Geometry &geom = warpx_instance.Geom(0);
         auto plo = geom.ProbLoArray();
@@ -502,7 +503,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromEmbeddedBoundaries (
 
             auto& species_buffer = buffer[i];
             for (int lev = 0; lev < pc.numLevels(); ++lev) {
-                for (WarpXParIter pti(pc, lev); pti.isValid(); ++pti) {
+                for (PIter pti(pc, lev); pti.isValid(); ++pti) {
                     species_buffer.DefineAndReturnParticleTile(
                         lev, pti.index(), pti.LocalTileIndex());
                 }
@@ -515,7 +516,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromEmbeddedBoundaries (
 #ifdef AMREX_USE_OMP
 #pragma omp parallel if (amrex::Gpu::notInLaunchRegion())
 #endif
-                for (WarpXParIter pti(pc, lev); pti.isValid(); ++pti) {
+                for (PIter pti(pc, lev); pti.isValid(); ++pti) {
                     auto phiarr = (*distance_to_eb[lev])[pti].array();  // signed distance function
                     auto index = std::make_pair(pti.index(), pti.LocalTileIndex());
                     if (plevel.find(index) == plevel.end()) { continue; }
@@ -569,7 +570,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromEmbeddedBoundaries (
                                                            FindEmbeddedBoundaryIntersection{step_scraped_index,
                                                                                             delta_index, normal_index,
                                                                                             step, dt, phiarr, dxi, plo},
-                                                           0, dst_index);
+                                                           decltype(dst_index){0}, dst_index);
 
                     }
                 }

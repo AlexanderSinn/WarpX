@@ -2285,8 +2285,8 @@ PhysicalParticleContainer::SplitParticles (int lev)
 {
     auto& mypc = WarpX::GetInstance().GetPartContainer();
     auto& pctmp_split = mypc.GetPCtmp();
-    RealVector psplit_x, psplit_y, psplit_z, psplit_w;
-    RealVector psplit_ux, psplit_uy, psplit_uz;
+    amrex::Vector<ParticleReal> psplit_x, psplit_y, psplit_z, psplit_w;
+    amrex::Vector<ParticleReal> psplit_ux, psplit_uy, psplit_uz;
     long np_split_to_add = 0;
     long np_split;
     if(split_type==0)
@@ -2353,7 +2353,7 @@ PhysicalParticleContainer::SplitParticles (int lev)
                     // Add one particle with offset in x
                     psplit_x.push_back( xp + ishift*split_offset[0] );
                     psplit_y.push_back( yp );
-                    psplit_x.push_back( zp );
+                    psplit_z.push_back( zp );
                     psplit_ux.push_back( uxp[i] );
                     psplit_uy.push_back( uyp[i] );
                     psplit_uz.push_back( uzp[i] );
@@ -2457,25 +2457,17 @@ PhysicalParticleContainer::SplitParticles (int lev)
     // they are not re-split when entering a higher level
     // AddNParticles calls Redistribute, so that particles
     // in pctmp_split are in the proper grids and tiles
-    const amrex::Vector<ParticleReal> xp(psplit_x.data(), psplit_x.data() + np_split_to_add);
-    const amrex::Vector<ParticleReal> yp(psplit_y.data(), psplit_y.data() + np_split_to_add);
-    const amrex::Vector<ParticleReal> zp(psplit_z.data(), psplit_z.data() + np_split_to_add);
-    const amrex::Vector<ParticleReal> uxp(psplit_ux.data(), psplit_ux.data() + np_split_to_add);
-    const amrex::Vector<ParticleReal> uyp(psplit_uy.data(), psplit_uy.data() + np_split_to_add);
-    const amrex::Vector<ParticleReal> uzp(psplit_uz.data(), psplit_uz.data() + np_split_to_add);
-    const amrex::Vector<ParticleReal> wp(psplit_w.data(), psplit_w.data() + np_split_to_add);
-
     amrex::Vector<amrex::Vector<ParticleReal>> attr;
-    attr.push_back(wp);
+    attr.push_back(psplit_w);
     const amrex::Vector<amrex::Vector<int>> attr_int;
     pctmp_split.AddNParticles(lev,
                               np_split_to_add,
-                              xp,
-                              yp,
-                              zp,
-                              uxp,
-                              uyp,
-                              uzp,
+                              psplit_x,
+                              psplit_y,
+                              psplit_z,
+                              psplit_ux,
+                              psplit_uy,
+                              psplit_uz,
                               1,
                               attr,
                               0, attr_int,

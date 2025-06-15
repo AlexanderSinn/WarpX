@@ -364,6 +364,8 @@ FlushFormatPlotfile::WriteParticles(const std::string& dir,
             pinned_pc->make_alike<amrex::PolymorphicArenaAllocator>() :
             pc->make_alike<amrex::PolymorphicArenaAllocator>();
 
+        tmp.SetArena(amrex::The_Pinned_Arena());
+
         Vector<std::string> real_names;
         Vector<std::string> int_names;
         Vector<int> int_flags;
