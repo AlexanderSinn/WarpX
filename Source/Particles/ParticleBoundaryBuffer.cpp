@@ -156,6 +156,13 @@ struct FindEmbeddedBoundaryIntersection {
         dst.rdata(PIdx::nattribs + m_normal_index)[dst_i] = 0.0;
         dst.rdata(PIdx::nattribs + m_normal_index+1)[dst_i] = 0.0;
         dst.rdata(PIdx::nattribs + m_normal_index+2)[dst_i] = 0.0;
+#elif (defined WARPX_DIM_RCYLINDER) || (defined WARPX_DIM_RSPHERE)
+        dst.rdata(PIdx::x)[dst_i] = x_temp;
+        amrex::ignore_unused(y_temp, z_temp);
+        //normal not defined
+        dst.rdata(PIdx::nattribs + m_normal_index)[dst_i] = 0.0;
+        dst.rdata(PIdx::nattribs + m_normal_index+1)[dst_i] = 0.0;
+        dst.rdata(PIdx::nattribs + m_normal_index+2)[dst_i] = 0.0;
 #else
         amrex::ignore_unused(x_temp, y_temp, z_temp,normal);
 #endif
@@ -220,6 +227,9 @@ ParticleBoundaryBuffer::ParticleBoundaryBuffer ()
 #if defined(WARPX_DIM_1D_Z)
     constexpr auto idx_zlo = 0;
     constexpr auto idx_zhi = 1;
+#elif (defined WARPX_DIM_RCYLINDER) || (defined WARPX_DIM_RSPHERE)
+    constexpr auto idx_xlo = 0;
+    constexpr auto idx_xhi = 1;
 #elif defined(WARPX_DIM_XZ) || defined(WARPX_DIM_RZ)
     constexpr auto idx_xlo = 0;
     constexpr auto idx_xhi = 1;
@@ -242,6 +252,9 @@ ParticleBoundaryBuffer::ParticleBoundaryBuffer ()
 #if defined(WARPX_DIM_1D_Z)
         pp_species.query("save_particles_at_zlo", m_do_boundary_buffer[idx_zlo][ispecies]);
         pp_species.query("save_particles_at_zhi", m_do_boundary_buffer[idx_zhi][ispecies]);
+#elif (defined WARPX_DIM_RCYLINDER) || (defined WARPX_DIM_RSPHERE)
+        pp_species.query("save_particles_at_xlo", m_do_boundary_buffer[idx_xlo][ispecies]);
+        pp_species.query("save_particles_at_xhi", m_do_boundary_buffer[idx_xhi][ispecies]);
 #elif defined(WARPX_DIM_XZ) || defined(WARPX_DIM_RZ)
         pp_species.query("save_particles_at_xlo", m_do_boundary_buffer[idx_xlo][ispecies]);
         pp_species.query("save_particles_at_xhi", m_do_boundary_buffer[idx_xhi][ispecies]);
@@ -267,6 +280,9 @@ ParticleBoundaryBuffer::ParticleBoundaryBuffer ()
 #if defined(WARPX_DIM_1D_Z)
     m_boundary_names[idx_zlo] = "zlo";
     m_boundary_names[idx_zhi] = "zhi";
+#elif (defined WARPX_DIM_RCYLINDER) || (defined WARPX_DIM_RSPHERE)
+    m_boundary_names[idx_xlo] = "xlo";
+    m_boundary_names[idx_xhi] = "xhi";
 #elif defined(WARPX_DIM_XZ) || defined(WARPX_DIM_RZ)
     m_boundary_names[idx_xlo] = "xlo";
     m_boundary_names[idx_xhi] = "xhi";
@@ -423,7 +439,11 @@ void ParticleBoundaryBuffer::gatherParticlesFromDomainBoundaries (MultiParticleC
                         amrex::ReduceData<int> reduce_data(reduce_op);
                         {
                           WARPX_PROFILE("ParticleBoundaryBuffer::gatherParticles::count_out_of_bounds");
+#ifdef AMREX_USE_GPU
+                          const amrex::RandomEngine rng{nullptr};
+#else
                           const amrex::RandomEngine rng{};
+#endif
                           reduce_op.eval(np, reduce_data, [=] AMREX_GPU_HOST_DEVICE (int ip)
                                          { return predicate(ptile_data, ip, rng) ? 1 : 0; });
                         }
