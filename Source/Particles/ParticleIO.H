@@ -64,10 +64,10 @@ particlesConvertUnits (ConvertDirection convert_direction, T_ParticleContainer* 
             // The GetStructOfArrays is called directly since the convenience routine GetAttribs
             // is only available in WarpXParIter. ParIter is used here since the pc passed in
             // will sometimes be a PinnedMemoryParticleContainer (not derived from a WarpXParticleContainer).
-            auto& attribs = pti.GetStructOfArrays().GetRealData();
-            ParticleReal* AMREX_RESTRICT ux = attribs[PIdx::ux].dataPtr();
-            ParticleReal* AMREX_RESTRICT uy = attribs[PIdx::uy].dataPtr();
-            ParticleReal* AMREX_RESTRICT uz = attribs[PIdx::uz].dataPtr();
+            auto& ptile = pti.GetParticleTile();
+            ParticleReal* AMREX_RESTRICT ux = ptile.GetRealData(PIdx::ux).dataPtr();
+            ParticleReal* AMREX_RESTRICT uy = ptile.GetRealData(PIdx::uy).dataPtr();
+            ParticleReal* AMREX_RESTRICT uz = ptile.GetRealData(PIdx::uz).dataPtr();
             // Loop over the particles and convert momentum
             const long np = pti.numParticles();
             ParallelFor( np,
