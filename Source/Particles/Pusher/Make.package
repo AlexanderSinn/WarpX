@@ -1,1 +1,5 @@
+CEXE_sources += PushP.cpp
+CEXE_sources += PushPX.cpp
+CEXE_sources += ImplicitPushXP.cpp
+
 VPATH_LOCATIONS   += $(WARPX_HOME)/Source/Particles/Pusher
