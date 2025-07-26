@@ -508,7 +508,7 @@ public:
      * deposits the initial ion charge and current (before the first particle
      * push), to be used in the ``HybridPICEvolveFields()`` function.
      */
-    void HybridPICDepositInitialRhoAndJ ();
+    void HybridPICInitializeRhoJandB ();
 
     /**
      * \brief Hybrid-PIC deposition function.
@@ -966,6 +966,10 @@ public:
     ablastr::fields::MultiFabRegister m_fields;
     ablastr::fields::MultiFabRegister& GetMultiFabRegister() {return m_fields;}
 
+    //! Use this function to override the Level 0 grids made by AMReX.
+    //! This function is called in amrex::AmrCore::InitFromScratch.
+    void PostProcessBaseGrids (amrex::BoxArray& ba0) const final;
+
 protected:
 
     /**
@@ -994,10 +998,6 @@ protected:
      *  can be used in the function used to define the E and B fields on the grid.
      */
     void InitLevelData (int lev, amrex::Real time);
-
-    //! Use this function to override the Level 0 grids made by AMReX.
-    //! This function is called in amrex::AmrCore::InitFromScratch.
-    void PostProcessBaseGrids (amrex::BoxArray& ba0) const final;
 
     //! Use this function to override how DistributionMapping is made.
     [[nodiscard]] amrex::DistributionMapping
@@ -1410,7 +1410,7 @@ private:
 
     //! Solve Poisson equation when loading an external magnetic field to clean divergence
     //! This is useful to remove errors that could lead to non-zero B field divergence
-    bool m_do_divb_cleaning_external = false;
+    bool m_do_initial_div_cleaning = false;
 
     //! Domain decomposition on Level 0
     amrex::IntVect numprocs{0};

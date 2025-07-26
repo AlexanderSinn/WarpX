@@ -213,7 +213,7 @@ WarpX::Evolve (int numsteps)
         if (step == step_begin &&
             electromagnetic_solver_id == ElectromagneticSolverAlgo::HybridPIC
         ) {
-            HybridPICDepositInitialRhoAndJ();
+            HybridPICInitializeRhoJandB();
         }
 
         // Run multi-physics modules:
@@ -221,7 +221,7 @@ WarpX::Evolve (int numsteps)
         doFieldIonization();
 
         ExecutePythonCallback("beforecollisions");
-        mypc->doCollisions( cur_time, dt[0] );
+        mypc->doCollisions( step, cur_time, dt[0] );
         ExecutePythonCallback("aftercollisions");
 
 #ifdef WARPX_QED
