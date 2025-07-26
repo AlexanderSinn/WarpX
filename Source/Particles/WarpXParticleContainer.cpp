@@ -80,19 +80,19 @@
 using namespace amrex;
 
 WarpXParIter::WarpXParIter (ContainerType& pc, int level)
-    : amrex::ParIterSoA2<>(pc, level,
+    : amrex::ParIterRTSoA<>(pc, level,
              MFItInfo().SetDynamic(WarpX::do_dynamic_scheduling))
 {
 }
 
 WarpXParIter::WarpXParIter (ContainerType& pc, int level, MFItInfo& info)
-    : amrex::ParIterSoA2<>(pc, level,
+    : amrex::ParIterRTSoA<>(pc, level,
                    info.SetDynamic(WarpX::do_dynamic_scheduling))
 {
 }
 
 WarpXParticleContainer::WarpXParticleContainer (AmrCore* amr_core, int ispecies)
-    : amrex::ParticleContainerPureSoA2<>(amr_core->GetParGDB())
+    : amrex::ParticleContainerRTSoA<>(amr_core->GetParGDB())
     , species_id(ispecies)
 {
     SetParticleSize();
@@ -220,7 +220,11 @@ WarpXParticleContainer::AddNParticles (int /*lev*/, long n,
 
     using PinnedTile = typename ParticleContainerType::ParticleTileType;
     PinnedTile pinned_tile;
-    pinned_tile.define(amrex::The_Pinned_Arena(), NumRuntimeRealComps(), NumRuntimeIntComps());
+    pinned_tile.define(
+        NumRuntimeRealComps(), NumRuntimeIntComps(),
+        nullptr, nullptr,
+        amrex::The_Pinned_Arena()
+    );
 
     const std::size_t np = iend-ibegin;
 
@@ -1765,18 +1769,18 @@ WarpXParticleContainer::DepositTotalNGPTemperature (amrex::MultiFab* temperature
     // average velocity squared <u - <u>>**2. This method is more robust than the
     // single step using <u**2> - <u>**2 when <u> >> u_rms.
     ParticleToMesh(*this, sum_mf, lev,
-            [=] AMREX_GPU_DEVICE (const WarpXParticleContainer::ConstParticleType& p,
+            [=] AMREX_GPU_DEVICE (const WarpXParticleContainer::ConstPTDType& ptd, int i,
                 amrex::Array4<amrex::Real> const& sum_array,
                 amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> const& plo,
                 amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> const& dxi)
             {
                 // Get position in AMReX convention to calculate corresponding index.
-                const auto [ii, jj, kk] = amrex::getParticleCell(p, plo, dxi).dim3();
+                const auto [ii, jj, kk] = amrex::getParticleCell(ptd[i], plo, dxi).dim3();
 
-                amrex::ParticleReal const w  = p.rdata(PIdx::w);
-                amrex::ParticleReal const ux = p.rdata(PIdx::ux);
-                amrex::ParticleReal const uy = p.rdata(PIdx::uy);
-                amrex::ParticleReal const uz = p.rdata(PIdx::uz);
+                amrex::ParticleReal const w  = ptd.rdata(PIdx::w)[i];
+                amrex::ParticleReal const ux = ptd.rdata(PIdx::ux)[i];
+                amrex::ParticleReal const uy = ptd.rdata(PIdx::uy)[i];
+                amrex::ParticleReal const uz = ptd.rdata(PIdx::uz)[i];
                 amrex::Gpu::Atomic::AddNoRet(&sum_array(ii, jj, kk, 0), (amrex::Real)(w));
                 amrex::Gpu::Atomic::AddNoRet(&sum_array(ii, jj, kk, 1), (amrex::Real)(w*ux));
                 amrex::Gpu::Atomic::AddNoRet(&sum_array(ii, jj, kk, 2), (amrex::Real)(w*uy));
@@ -1888,14 +1892,14 @@ WarpXParticleContainer::DepositNumberDensity (amrex::MultiFab* number_density, c
 
     // Calculate the number density
     ParticleToMesh(*this, *number_density, lev,
-            [=] AMREX_GPU_DEVICE (const WarpXParticleContainer::ConstParticleType& p,
+            [=] AMREX_GPU_DEVICE (const WarpXParticleContainer::ConstPTDType& ptd, int i,
                 amrex::Array4<amrex::Real> const& num_array,
                 amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> const& plo,
                 amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> const& dxi)
             {
                 // Get position in AMReX convention to calculate corresponding index.
-                const auto [ii, jj, kk] = amrex::getParticleCell(p, plo, dxi).dim3();
-                const amrex::ParticleReal w = p.rdata(PIdx::w);
+                const auto [ii, jj, kk] = amrex::getParticleCell(ptd[i], plo, dxi).dim3();
+                const amrex::ParticleReal w = ptd.rdata(PIdx::w)[i];
                 amrex::Gpu::Atomic::AddNoRet(&num_array(ii, jj, kk), (amrex::Real)(w));
             });
 
@@ -2018,7 +2022,7 @@ std::pair<amrex::ParticleReal, amrex::ParticleReal> WarpXParticleContainer::sumP
     // Get mass (used only for particles other than photons, see below)
     const amrex::Real m = this->mass;
 
-    using PType = typename WarpXParticleContainer::SuperParticleType;
+    using ConstPTDType = typename WarpXParticleContainer::ConstPTDType;
 
     amrex::Real Etot = 0.0_rt;
     amrex::Real Ws   = 0.0_rt;
@@ -2031,12 +2035,13 @@ std::pair<amrex::ParticleReal, amrex::ParticleReal> WarpXParticleContainer::sumP
     {
         auto r = amrex::ParticleReduce<amrex::ReduceData<Real, Real>>(
             *this,
-            [=] AMREX_GPU_DEVICE(const PType& p) noexcept -> amrex::GpuTuple<Real, Real>
+            [=] AMREX_GPU_DEVICE(const ConstPTDType& ptd, int i) noexcept
+                -> amrex::GpuTuple<Real, Real>
             {
-                const amrex::ParticleReal w  = p.rdata(PIdx::w);
-                const amrex::ParticleReal ux = p.rdata(PIdx::ux);
-                const amrex::ParticleReal uy = p.rdata(PIdx::uy);
-                const amrex::ParticleReal uz = p.rdata(PIdx::uz);
+                const amrex::ParticleReal w  = ptd.rdata(PIdx::w)[i];
+                const amrex::ParticleReal ux = ptd.rdata(PIdx::ux)[i];
+                const amrex::ParticleReal uy = ptd.rdata(PIdx::uy)[i];
+                const amrex::ParticleReal uz = ptd.rdata(PIdx::uz)[i];
                 return {w*Algorithms::KineticEnergyPhotons(ux,uy,uz),w};
             },
             reduce_ops);
@@ -2048,12 +2053,13 @@ std::pair<amrex::ParticleReal, amrex::ParticleReal> WarpXParticleContainer::sumP
     {
         auto r = amrex::ParticleReduce<amrex::ReduceData<Real, Real>>(
             *this,
-            [=] AMREX_GPU_DEVICE(const PType& p) noexcept -> amrex::GpuTuple<Real, Real>
+            [=] AMREX_GPU_DEVICE(const ConstPTDType& ptd, int i) noexcept
+                -> amrex::GpuTuple<Real, Real>
             {
-                const amrex::ParticleReal w  = p.rdata(PIdx::w);
-                const amrex::ParticleReal ux = p.rdata(PIdx::ux);
-                const amrex::ParticleReal uy = p.rdata(PIdx::uy);
-                const amrex::ParticleReal uz = p.rdata(PIdx::uz);
+                const amrex::ParticleReal w  = ptd.rdata(PIdx::w)[i];
+                const amrex::ParticleReal ux = ptd.rdata(PIdx::ux)[i];
+                const amrex::ParticleReal uy = ptd.rdata(PIdx::uy)[i];
+                const amrex::ParticleReal uz = ptd.rdata(PIdx::uz)[i];
 
                 return {w*Algorithms::KineticEnergy(ux,uy,uz,m), w};
             },

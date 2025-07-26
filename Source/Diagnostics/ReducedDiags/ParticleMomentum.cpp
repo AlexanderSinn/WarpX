@@ -137,7 +137,7 @@ void ParticleMomentum::ComputeDiags (int step)
         // but ux, uy, uz are calculated assuming a mass equal to the electron mass)
         const amrex::Real m = (myspc.AmIA<PhysicalSpecies::photon>()) ? PhysConst::m_e : myspc.getMass();
 
-        using PType = typename WarpXParticleContainer::ConstParticleType;
+        using ConstPTDType = typename WarpXParticleContainer::ConstPTDType;
 
         // Use amrex::ParticleReduce to compute the sum of the momenta and weights of all particles
         // held by the current MPI rank for this species (loop over all boxes held by this MPI rank):
@@ -145,12 +145,13 @@ void ParticleMomentum::ComputeDiags (int step)
         amrex::ReduceOps<ReduceOpSum, ReduceOpSum, ReduceOpSum, ReduceOpSum> reduce_ops;
         auto r = amrex::ParticleReduce<amrex::ReduceData<Real, Real, Real, Real>>(
             myspc,
-            [=] AMREX_GPU_DEVICE(const PType& p) noexcept -> amrex::GpuTuple<Real, Real, Real, Real>
+            [=] AMREX_GPU_DEVICE(const ConstPTDType& ptd, int i) noexcept
+                -> amrex::GpuTuple<Real, Real, Real, Real>
             {
-                const amrex::Real w  = p.rdata(PIdx::w);
-                const amrex::Real ux = p.rdata(PIdx::ux);
-                const amrex::Real uy = p.rdata(PIdx::uy);
-                const amrex::Real uz = p.rdata(PIdx::uz);
+                const amrex::Real w  = ptd.rdata(PIdx::w)[i];
+                const amrex::Real ux = ptd.rdata(PIdx::ux)[i];
+                const amrex::Real uy = ptd.rdata(PIdx::uy)[i];
+                const amrex::Real uz = ptd.rdata(PIdx::uz)[i];
                 return {w*m*ux, w*m*uy, w*m*uz, w};
             },
             reduce_ops);

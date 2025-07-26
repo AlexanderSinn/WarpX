@@ -58,7 +58,7 @@ ParticleReductionFunctor::operator() (amrex::MultiFab& mf_dst, const int dcomp, 
     auto filter_fn = m_filter_fn;
     const bool do_filter = m_do_filter;
     ParticleToMesh(pc, red_mf, m_lev,
-            [=] AMREX_GPU_DEVICE (const WarpXParticleContainer::ConstParticleType& p,
+            [=] AMREX_GPU_DEVICE (const WarpXParticleContainer::ConstPTDType& ptd, int i,
                 amrex::Array4<amrex::Real> const& out_array,
                 amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> const& plo,
                 amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> const& dxi)
@@ -66,27 +66,27 @@ ParticleReductionFunctor::operator() (amrex::MultiFab& mf_dst, const int dcomp, 
                 // Get position in WarpX convention to use in parser. Will be different from
                 // p.pos() for 1D and 2D simulations.
                 amrex::ParticleReal xw = 0._rt, yw = 0._rt, zw = 0._rt;
-                get_particle_position(p, xw, yw, zw);
+                get_particle_position(ptd[i], xw, yw, zw);
 
                 // Get position in AMReX convention to calculate corresponding index.
                 // Ideally this will be replaced with the AMReX NGP interpolator
                 // Always do x direction. No RZ case because it's not implemented, and code
                 // will have aborted
-                const auto [ii, jj, kk] = amrex::getParticleCell(p, plo, dxi).dim3();
+                const auto [ii, jj, kk] = amrex::getParticleCell(ptd[i], plo, dxi).dim3();
 
                 // Fix dimensions since parser assumes u = gamma * v / c
-                const amrex::ParticleReal ux = p.rdata(PIdx::ux) / PhysConst::c;
-                const amrex::ParticleReal uy = p.rdata(PIdx::uy) / PhysConst::c;
-                const amrex::ParticleReal uz = p.rdata(PIdx::uz) / PhysConst::c;
+                const amrex::ParticleReal ux = ptd.rdata(PIdx::ux)[i] / PhysConst::c;
+                const amrex::ParticleReal uy = ptd.rdata(PIdx::uy)[i] / PhysConst::c;
+                const amrex::ParticleReal uz = ptd.rdata(PIdx::uz)[i] / PhysConst::c;
                 const bool filtered_out_flag = ((do_filter) && (filter_fn(xw, yw, zw, ux, uy, uz) == 0.0_prt));
                 const amrex::Real value = (filtered_out_flag) ? (0._rt):(map_fn(xw, yw, zw, ux, uy, uz));
-                amrex::Gpu::Atomic::AddNoRet(&out_array(ii, jj, kk, 0), (amrex::Real)(p.rdata(PIdx::w) * value));
+                amrex::Gpu::Atomic::AddNoRet(&out_array(ii, jj, kk, 0), (amrex::Real)(ptd.rdata(PIdx::w)[i] * value));
             });
     if (m_do_average) {
         amrex::MultiFab ppc_mf(warpx.boxArray(m_lev), warpx.DistributionMap(m_lev), 1, ng);
         // Add the weight for each particle -- total number of particles of this species
         ParticleToMesh(pc, ppc_mf, m_lev,
-                [=] AMREX_GPU_DEVICE (const WarpXParticleContainer::ConstParticleType& p,
+                [=] AMREX_GPU_DEVICE (const WarpXParticleContainer::ConstPTDType& ptd, int i,
                     amrex::Array4<amrex::Real> const& out_array,
                     amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> const& plo,
                     amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> const& dxi)
@@ -94,22 +94,22 @@ ParticleReductionFunctor::operator() (amrex::MultiFab& mf_dst, const int dcomp, 
                     // Get position in WarpX convention to use in parser. Will be different from
                     // p.pos() for 1D and 2D simulations.
                     amrex::ParticleReal xw = 0._rt, yw = 0._rt, zw = 0._rt;
-                    get_particle_position(p, xw, yw, zw);
+                    get_particle_position(ptd[i], xw, yw, zw);
 
                     // Get position in AMReX convention to calculate corresponding index.
                     // Ideally this will be replaced with the AMReX NGP interpolator
                     // Always do x direction. No RZ case because it's not implemented, and code
                     // will have aborted
-                    const auto [ii, jj, kk] = amrex::getParticleCell(p, plo, dxi).dim3();
+                    const auto [ii, jj, kk] = amrex::getParticleCell(ptd[i], plo, dxi).dim3();
 
                     // Fix dimensions since parser assumes u = gamma * v / c
-                    const amrex::ParticleReal ux = p.rdata(PIdx::ux) / PhysConst::c;
-                    const amrex::ParticleReal uy = p.rdata(PIdx::uy) / PhysConst::c;
-                    const amrex::ParticleReal uz = p.rdata(PIdx::uz) / PhysConst::c;
+                    const amrex::ParticleReal ux = ptd.rdata(PIdx::ux)[i] / PhysConst::c;
+                    const amrex::ParticleReal uy = ptd.rdata(PIdx::uy)[i] / PhysConst::c;
+                    const amrex::ParticleReal uz = ptd.rdata(PIdx::uz)[i] / PhysConst::c;
                     amrex::Real filter;
                     if ((do_filter) && (filter_fn(xw, yw, zw, ux, uy, uz) == 0._rt)) { filter = 0._rt;
                     } else { filter = 1._rt; }
-                    amrex::Gpu::Atomic::AddNoRet(&out_array(ii, jj, kk, 0), (amrex::Real)(p.rdata(PIdx::w) * filter));
+                    amrex::Gpu::Atomic::AddNoRet(&out_array(ii, jj, kk, 0), (amrex::Real)(ptd.rdata(PIdx::w)[i] * filter));
                 });
         // Divide value by number of particles for average. Set average to zero if there are no particles
         for (amrex::MFIter mfi(red_mf, amrex::TilingIfNotGPU()); mfi.isValid(); ++mfi)

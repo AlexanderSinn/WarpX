@@ -114,10 +114,10 @@ struct IntIdx {
 };
 
 class WarpXParIter
-    : public amrex::ParIterSoA2<>
+    : public amrex::ParIterRTSoA<>
 {
 public:
-    using amrex::ParIterSoA2<>::ParIterSoA2;
+    using amrex::ParIterRTSoA<>::ParIterRTSoA;
 
     WarpXParIter (ContainerType& pc, int level);
 
@@ -210,7 +210,7 @@ public:
  * derived classes, e.g., Evolve) or actual functions (e.g. CurrentDeposition).
  */
 class WarpXParticleContainer
-    : public amrex::ParticleContainerPureSoA2<>
+    : public amrex::ParticleContainerRTSoA<>
 {
 public:
     friend MultiParticleContainer;

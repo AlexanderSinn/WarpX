@@ -221,7 +221,7 @@ void ColliderRelevant::ComputeDiags (int step)
         // get charge
         amrex::ParticleReal const q = myspc.getCharge();
 
-        using PType = typename WarpXParticleContainer::ConstParticleType;
+        using ConstPTDType = typename WarpXParticleContainer::ConstPTDType;
 
         num_dens[i_s] = myspc.GetChargeDensity(0);
         num_dens[i_s]->mult(1._prt/q);
@@ -229,9 +229,9 @@ void ColliderRelevant::ComputeDiags (int step)
 #if (AMREX_SPACEDIM == 1)
         // w_tot
         amrex::Real w_tot = ReduceSum( myspc,
-            [=] AMREX_GPU_HOST_DEVICE (const PType& p)
+            [=] AMREX_GPU_HOST_DEVICE (const ConstPTDType& ptd, int i)
             {
-                return p.rdata(PIdx::w);
+                return ptd.rdata(PIdx::w)[i];
             });
         amrex::ParallelDescriptor::ReduceRealSum(w_tot);
 #elif defined(WARPX_DIM_XZ)
@@ -245,14 +245,13 @@ void ColliderRelevant::ComputeDiags (int step)
                                                          Real,
                                                          Real, Real, Real>>(
             myspc,
-            [=] AMREX_GPU_DEVICE(const PType& p) noexcept -> amrex::GpuTuple<Real,
-                                                                             Real,
-                                                                             Real, Real, Real>
+            [=] AMREX_GPU_DEVICE(const ConstPTDType& ptd, int i) noexcept
+                -> amrex::GpuTuple<Real, Real, Real, Real, Real>
             {
-                const amrex::Real w  = p.rdata(PIdx::w);
-                const amrex::Real x = p.pos(0);
-                const amrex::Real ux = p.rdata(PIdx::ux);
-                const amrex::Real uz = p.rdata(PIdx::uz);
+                const amrex::Real w  = ptd.rdata(PIdx::w)[i];
+                const amrex::Real x = ptd.pos(0, i);
+                const amrex::Real ux = ptd.rdata(PIdx::ux)[i];
+                const amrex::Real uz = ptd.rdata(PIdx::uz)[i];
                 const amrex::Real thetax = std::atan2(ux, uz);
                 return {w, w*x, thetax, w*thetax, thetax};
             },
@@ -280,12 +279,13 @@ void ColliderRelevant::ComputeDiags (int step)
             amrex::ReduceOps<ReduceOpSum, ReduceOpSum> reduce_ops_std;
             auto r_std = amrex::ParticleReduce<amrex::ReduceData<Real, Real>>(
                 myspc,
-                [=] AMREX_GPU_DEVICE(const PType& p) noexcept -> amrex::GpuTuple<Real, Real>
+                [=] AMREX_GPU_DEVICE(const ConstPTDType& p, int i) noexcept
+                    -> amrex::GpuTuple<Real, Real>
                 {
-                    const amrex::Real w  = p.rdata(PIdx::w);
-                    const amrex::Real x = p.pos(0);
-                    const amrex::Real ux = p.rdata(PIdx::ux);
-                    const amrex::Real uz = p.rdata(PIdx::uz);
+                    const amrex::Real w  = ptd.rdata(PIdx::w)[i];
+                    const amrex::Real x = ptd.pos(0, i);
+                    const amrex::Real ux = ptd.rdata(PIdx::ux)[i];
+                    const amrex::Real uz = ptd.rdata(PIdx::uz)[i];
                     const amrex::Real thetax = std::atan2(ux, uz);
                     const amrex::Real tmp1 = (x - x_ave)*(x - x_ave)*w;
                     const amrex::Real tmp2 = (thetax - thetax_ave)*(thetax - thetax_ave)*w;
@@ -322,17 +322,15 @@ void ColliderRelevant::ComputeDiags (int step)
                                                          Real, Real, Real,
                                                          Real, Real, Real>>(
             myspc,
-            [=] AMREX_GPU_DEVICE(const PType& p) noexcept -> amrex::GpuTuple<Real,
-                                                                             Real, Real,
-                                                                             Real, Real, Real,
-                                                                             Real, Real, Real>
+            [=] AMREX_GPU_DEVICE(const ConstPTDType& ptd, int i) noexcept
+                -> amrex::GpuTuple<Real, Real, Real, Real, Real, Real, Real, Real, Real>
             {
-                const amrex::Real w  = p.rdata(PIdx::w);
-                const amrex::Real x = p.pos(0);
-                const amrex::Real y = p.pos(1);
-                const amrex::Real ux = p.rdata(PIdx::ux);
-                const amrex::Real uy = p.rdata(PIdx::uy);
-                const amrex::Real uz = p.rdata(PIdx::uz);
+                const amrex::Real w  = ptd.rdata(PIdx::w)[i];
+                const amrex::Real x = ptd.pos(0, i);
+                const amrex::Real y = ptd.pos(1, i);
+                const amrex::Real ux = ptd.rdata(PIdx::ux)[i];
+                const amrex::Real uy = ptd.rdata(PIdx::uy)[i];
+                const amrex::Real uz = ptd.rdata(PIdx::uz)[i];
                 const amrex::Real thetax = std::atan2(ux, uz);
                 const amrex::Real thetay = std::atan2(uy, uz);
                 return {w, w*x, w*y,
@@ -371,14 +369,15 @@ void ColliderRelevant::ComputeDiags (int step)
             amrex::ReduceOps<ReduceOpSum, ReduceOpSum, ReduceOpSum, ReduceOpSum> reduce_ops_std;
             auto r_std = amrex::ParticleReduce<amrex::ReduceData<Real, Real, Real, Real>>(
                 myspc,
-                [=] AMREX_GPU_DEVICE(const PType& p) noexcept -> amrex::GpuTuple<Real, Real, Real, Real>
+                [=] AMREX_GPU_DEVICE(const ConstPTDType& ptd, int i) noexcept
+                    -> amrex::GpuTuple<Real, Real, Real, Real>
                 {
-                    const amrex::Real w  = p.rdata(PIdx::w);
-                    const amrex::Real x = p.pos(0);
-                    const amrex::Real ux = p.rdata(PIdx::ux);
-                    const amrex::Real y = p.pos(1);
-                    const amrex::Real uy = p.rdata(PIdx::uy);
-                    const amrex::Real uz = p.rdata(PIdx::uz);
+                    const amrex::Real w  = ptd.rdata(PIdx::w)[i];
+                    const amrex::Real x = ptd.pos(0, i);
+                    const amrex::Real ux = ptd.rdata(PIdx::ux)[i];
+                    const amrex::Real y = ptd.pos(1, i);
+                    const amrex::Real uy = ptd.rdata(PIdx::uy)[i];
+                    const amrex::Real uz = ptd.rdata(PIdx::uz)[i];
                     const amrex::Real thetax = std::atan2(ux, uz);
                     const amrex::Real thetay = std::atan2(uy, uz);
                     const amrex::Real tmp1 = (x - x_ave)*(x - x_ave)*w;

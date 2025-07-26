@@ -219,7 +219,7 @@ void BeamRelevant::ComputeDiags (int step)
         ParticleReal const m = myspc.getMass();
         ParticleReal const q = myspc.getCharge();
 
-        using PType = typename WarpXParticleContainer::ConstParticleType;
+        using ConstPTDType = typename WarpXParticleContainer::ConstPTDType;
 
         // number of reduction operations in first concurrent batch
         constexpr size_t num_red_ops_1 = 8;
@@ -228,16 +228,16 @@ void BeamRelevant::ComputeDiags (int step)
 
         auto r1 = amrex::ParticleReduce<ReducedDataT1>(
             myspc,
-            [=] AMREX_GPU_DEVICE(const PType& p) noexcept -> ReducedDataT1::Type
+            [=] AMREX_GPU_DEVICE(const ConstPTDType& ptd, int i) noexcept -> ReducedDataT1::Type
             {
-                const ParticleReal p_ux = p.rdata(PIdx::ux);
-                const ParticleReal p_uy = p.rdata(PIdx::uy);
-                const ParticleReal p_uz = p.rdata(PIdx::uz);
+                const ParticleReal p_ux = ptd.rdata(PIdx::ux)[i];
+                const ParticleReal p_uy = ptd.rdata(PIdx::uy)[i];
+                const ParticleReal p_uz = ptd.rdata(PIdx::uz)[i];
                 const ParticleReal p_us = p_ux*p_ux + p_uy*p_uy + p_uz*p_uz;
-                const ParticleReal p_w = p.rdata(PIdx::w);
+                const ParticleReal p_w = ptd.rdata(PIdx::w)[i];
 
                 ParticleReal p_x, p_y, p_z;
-                get_particle_position(p, p_x, p_y, p_z);
+                get_particle_position(ptd[i], p_x, p_y, p_z);
 
                 const ParticleReal p_x_mean = p_x*p_w;
                 const ParticleReal p_y_mean = p_y*p_w;
@@ -293,17 +293,17 @@ void BeamRelevant::ComputeDiags (int step)
 
         auto r2 = amrex::ParticleReduce<ReducedDataT2>(
             myspc,
-            [=] AMREX_GPU_DEVICE(const PType& p) noexcept -> ReducedDataT2::Type
+            [=] AMREX_GPU_DEVICE(const ConstPTDType& ptd, int i) noexcept -> ReducedDataT2::Type
             {
-                const ParticleReal p_ux = p.rdata(PIdx::ux);
-                const ParticleReal p_uy = p.rdata(PIdx::uy);
-                const ParticleReal p_uz = p.rdata(PIdx::uz);
+                const ParticleReal p_ux = ptd.rdata(PIdx::ux)[i];
+                const ParticleReal p_uy = ptd.rdata(PIdx::uy)[i];
+                const ParticleReal p_uz = ptd.rdata(PIdx::uz)[i];
                 const ParticleReal p_us = p_ux*p_ux + p_uy*p_uy + p_uz*p_uz;
                 const ParticleReal p_gm = std::sqrt(1.0_rt+p_us*inv_c2);
-                const ParticleReal p_w = p.rdata(PIdx::w);
+                const ParticleReal p_w = ptd.rdata(PIdx::w)[i];
 
                 ParticleReal p_x, p_y, p_z;
-                get_particle_position(p, p_x, p_y, p_z);
+                get_particle_position(ptd[i], p_x, p_y, p_z);
 
                 const ParticleReal p_x_ms = (p_x-x_mean)*(p_x-x_mean)*p_w;
                 const ParticleReal p_y_ms = (p_y-y_mean)*(p_y-y_mean)*p_w;

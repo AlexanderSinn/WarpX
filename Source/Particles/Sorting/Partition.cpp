@@ -135,7 +135,11 @@ PhysicalParticleContainer::PartitionParticlesInBuffers(
     {
         // Prepare temporary particle tile to copy to
         ParticleTileType ptile_tmp;
-        ptile_tmp.define(arena(), NumRuntimeRealComps(), NumRuntimeIntComps());
+        ptile_tmp.define(
+            NumRuntimeRealComps(), NumRuntimeIntComps(),
+            nullptr, nullptr,
+            arena()
+        );
         ptile_tmp.resize(np);
 
         // Copy and re-order the data of the current particle tile

@@ -185,7 +185,7 @@ void ParticleExtrema::ComputeDiags (int step)
             m = PhysConst::m_e;
         }
 
-        using PType = typename WarpXParticleContainer::ConstParticleType;
+        using ConstPTDType = typename WarpXParticleContainer::ConstPTDType;
         using OpMin = amrex::ReduceOpMin;
         using OpMax = amrex::ReduceOpMax;
 
@@ -194,12 +194,13 @@ void ParticleExtrema::ComputeDiags (int step)
         auto posminmax = amrex::ParticleReduce<amrex::ReduceData<amrex::Real, amrex::Real, amrex::Real, amrex::Real,
                                                                  amrex::Real, amrex::Real, amrex::Real, amrex::Real>>(
             myspc,
-            [=] AMREX_GPU_DEVICE(const PType& p) noexcept -> amrex::GpuTuple<amrex::Real, amrex::Real, amrex::Real, amrex::Real,
-                                                                             amrex::Real, amrex::Real, amrex::Real, amrex::Real>
+            [=] AMREX_GPU_DEVICE(const ConstPTDType& ptd, int i) noexcept
+                -> amrex::GpuTuple<amrex::Real, amrex::Real, amrex::Real, amrex::Real,
+                                   amrex::Real, amrex::Real, amrex::Real, amrex::Real>
             {
                 amrex::ParticleReal x, y, z;
-                get_particle_position(p, x, y, z);
-                amrex::Real const w = p.rdata(PIdx::w);
+                get_particle_position(ptd[i], x, y, z);
+                amrex::Real const w = ptd.rdata(PIdx::w)[i];
                 return {w, x, y, z, w, x, y, z};
             },
             reduce_ops);
@@ -217,12 +218,13 @@ void ParticleExtrema::ComputeDiags (int step)
         auto uminmax = amrex::ParticleReduce<amrex::ReduceData<amrex::Real, amrex::Real, amrex::Real, amrex::Real,
                                                                amrex::Real, amrex::Real, amrex::Real, amrex::Real>>(
             myspc,
-            [=] AMREX_GPU_DEVICE(const PType& p) noexcept -> amrex::GpuTuple<amrex::Real, amrex::Real, amrex::Real, amrex::Real,
-                                                                             amrex::Real, amrex::Real, amrex::Real, amrex::Real>
+            [=] AMREX_GPU_DEVICE(const ConstPTDType& ptd, int i) noexcept
+                -> amrex::GpuTuple<amrex::Real, amrex::Real, amrex::Real, amrex::Real,
+                                   amrex::Real, amrex::Real, amrex::Real, amrex::Real>
             {
-                amrex::Real const ux = p.rdata(PIdx::ux);
-                amrex::Real const uy = p.rdata(PIdx::uy);
-                amrex::Real const uz = p.rdata(PIdx::uz);
+                amrex::Real const ux = ptd.rdata(PIdx::ux)[i];
+                amrex::Real const uy = ptd.rdata(PIdx::uy)[i];
+                amrex::Real const uz = ptd.rdata(PIdx::uz)[i];
                 amrex::Real const g = std::sqrt(gfactor + (ux*ux + uy*uy + uz*uz)*inv_c2);
                 return {g, ux, uy, uz, g, ux, uy, uz};
             },

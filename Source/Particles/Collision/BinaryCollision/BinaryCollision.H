@@ -365,7 +365,7 @@ public:
             // Extract low-level data
             auto const n_cells = static_cast<int>(bins_1.numBins());
             // - Species 1
-            auto np1 = ptile_1.numParticles();
+            auto np1 = static_cast<int>(ptile_1.numParticles());
             const auto soa_1 = ptile_1.getParticleTileData();
             index_type* AMREX_RESTRICT indices_1 = bins_1.permutationPtr();
             index_type const* AMREX_RESTRICT cell_offsets_1 = bins_1.offsetsPtr();
@@ -439,10 +439,10 @@ public:
               End of calculations only required when creating product particles
             */
 
-            amrex::ParticleReal * const AMREX_RESTRICT u1x = soa_1.m_rdata[PIdx::ux];
-            amrex::ParticleReal * const AMREX_RESTRICT u1y = soa_1.m_rdata[PIdx::uy];
-            amrex::ParticleReal * const AMREX_RESTRICT u1z = soa_1.m_rdata[PIdx::uz];
-            amrex::ParticleReal * const AMREX_RESTRICT w1 = soa_1.m_rdata[PIdx::w];
+            amrex::ParticleReal * const AMREX_RESTRICT u1x = soa_1.rdata(PIdx::ux);
+            amrex::ParticleReal * const AMREX_RESTRICT u1y = soa_1.rdata(PIdx::uy);
+            amrex::ParticleReal * const AMREX_RESTRICT u1z = soa_1.rdata(PIdx::uz);
+            amrex::ParticleReal * const AMREX_RESTRICT w1 = soa_1.rdata(PIdx::w);
 
             // create vectors to store density and temperature on cell level
             amrex::Gpu::DeviceVector<amrex::ParticleReal> n1_vec;
@@ -506,9 +506,9 @@ public:
                 auto const pos1 = std::find(real_names1.begin(), real_names1.end(), "ux_n");
                 if (pos1 != real_names1.end()) {
                     int const u1x_ni = std::distance(real_names1.begin(), pos1);
-                    u1x_before_ptr = soa_1.m_runtime_rdata[u1x_ni];
-                    u1y_before_ptr = soa_1.m_runtime_rdata[u1x_ni + 1];
-                    u1z_before_ptr = soa_1.m_runtime_rdata[u1x_ni + 2];
+                    u1x_before_ptr = soa_1.rdata(PIdx::nattribs + u1x_ni);
+                    u1y_before_ptr = soa_1.rdata(PIdx::nattribs + u1x_ni + 1);
+                    u1z_before_ptr = soa_1.rdata(PIdx::nattribs + u1x_ni + 2);
                 } else {
                     u1x_before.resize(np1);
                     u1y_before.resize(np1);
@@ -803,7 +803,7 @@ public:
             // Extract low-level data
             auto const n_cells = static_cast<int>(bins_1.numBins());
             // - Species 1
-            auto np1 = ptile_1.numParticles();
+            auto np1 = static_cast<int>(ptile_1.numParticles());
             const auto soa_1 = ptile_1.getParticleTileData();
             index_type* AMREX_RESTRICT indices_1 = bins_1.permutationPtr();
             index_type const* AMREX_RESTRICT cell_offsets_1 = bins_1.offsetsPtr();
@@ -812,7 +812,7 @@ public:
             const amrex::ParticleReal m1 = species_1.getMass();
             auto get_position_1  = GetParticlePosition<PIdx>(ptile_1, getpos_offset);
             // - Species 2
-            auto np2 = ptile_2.numParticles();
+            auto np2 = static_cast<int>(ptile_2.numParticles());
             const auto soa_2 = ptile_2.getParticleTileData();
             index_type* AMREX_RESTRICT indices_2 = bins_2.permutationPtr();
             index_type const* AMREX_RESTRICT cell_offsets_2 = bins_2.offsetsPtr();
@@ -899,15 +899,15 @@ public:
               End of calculations only required when creating product particles
             */
 
-            amrex::ParticleReal * const AMREX_RESTRICT w1 = soa_1.m_rdata[PIdx::w];
-            amrex::ParticleReal * const AMREX_RESTRICT u1x = soa_1.m_rdata[PIdx::ux];
-            amrex::ParticleReal * const AMREX_RESTRICT u1y = soa_1.m_rdata[PIdx::uy];
-            amrex::ParticleReal * const AMREX_RESTRICT u1z = soa_1.m_rdata[PIdx::uz];
+            amrex::ParticleReal * const AMREX_RESTRICT w1 = soa_1.rdata(PIdx::w);
+            amrex::ParticleReal * const AMREX_RESTRICT u1x = soa_1.rdata(PIdx::ux);
+            amrex::ParticleReal * const AMREX_RESTRICT u1y = soa_1.rdata(PIdx::uy);
+            amrex::ParticleReal * const AMREX_RESTRICT u1z = soa_1.rdata(PIdx::uz);
 
-            amrex::ParticleReal * const AMREX_RESTRICT w2 = soa_2.m_rdata[PIdx::w];
-            amrex::ParticleReal * const AMREX_RESTRICT u2x = soa_2.m_rdata[PIdx::ux];
-            amrex::ParticleReal * const AMREX_RESTRICT u2y = soa_2.m_rdata[PIdx::uy];
-            amrex::ParticleReal * const AMREX_RESTRICT u2z = soa_2.m_rdata[PIdx::uz];
+            amrex::ParticleReal * const AMREX_RESTRICT w2 = soa_2.rdata(PIdx::w);
+            amrex::ParticleReal * const AMREX_RESTRICT u2x = soa_2.rdata(PIdx::ux);
+            amrex::ParticleReal * const AMREX_RESTRICT u2y = soa_2.rdata(PIdx::uy);
+            amrex::ParticleReal * const AMREX_RESTRICT u2z = soa_2.rdata(PIdx::uz);
 
             // create vectors to store density and temperature on cell level
             amrex::Gpu::DeviceVector<amrex::ParticleReal> n1_vec, n2_vec;
@@ -983,9 +983,9 @@ public:
                 auto const pos1 = std::find(real_names1.begin(), real_names1.end(), "ux_n");
                 if (pos1 != real_names1.end()) {
                     int const u1x_ni = std::distance(real_names1.begin(), pos1);
-                    u1x_before_ptr = soa_1.m_runtime_rdata[u1x_ni];
-                    u1y_before_ptr = soa_1.m_runtime_rdata[u1x_ni + 1];
-                    u1z_before_ptr = soa_1.m_runtime_rdata[u1x_ni + 2];
+                    u1x_before_ptr = soa_1.rdata(PIdx::nattribs + u1x_ni);
+                    u1y_before_ptr = soa_1.rdata(PIdx::nattribs + u1x_ni + 1);
+                    u1z_before_ptr = soa_1.rdata(PIdx::nattribs + u1x_ni + 2);
                 } else {
                     u1x_before.resize(np1);
                     u1y_before.resize(np1);
@@ -1008,9 +1008,9 @@ public:
                 auto const pos2 = std::find(real_names2.begin(), real_names2.end(), "ux_n");
                 if (pos2 != real_names2.end()) {
                     int const u2x_ni = std::distance(real_names2.begin(), pos2);
-                    u2x_before_ptr = soa_2.m_runtime_rdata[u2x_ni];
-                    u2y_before_ptr = soa_2.m_runtime_rdata[u2x_ni + 1];
-                    u2z_before_ptr = soa_2.m_runtime_rdata[u2x_ni + 2];
+                    u2x_before_ptr = soa_2.rdata(PIdx::nattribs + u2x_ni);
+                    u2y_before_ptr = soa_2.rdata(PIdx::nattribs + u2x_ni + 1);
+                    u2z_before_ptr = soa_2.rdata(PIdx::nattribs + u2x_ni + 2);
                 } else {
                     u2x_before.resize(np2);
                     u2y_before.resize(np2);

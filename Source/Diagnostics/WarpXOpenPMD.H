@@ -41,7 +41,7 @@ class WarpXParticleCounter
 {
 public:
   using ParticleContainer = typename WarpXParticleContainer::ParticleContainerType;
-  using ParticleIter = typename amrex::ParIterSoA2<>;
+  using ParticleIter = typename amrex::ParIterRTSoA<>;
 
   WarpXParticleCounter (ParticleContainer* pc);
   [[nodiscard]] unsigned long GetTotalNumParticles () const {return m_Total;}
@@ -77,7 +77,7 @@ class WarpXOpenPMDPlot
 {
 public:
   using ParticleContainer = typename WarpXParticleContainer::ParticleContainerType;
-  using ParticleIter = typename amrex::ParConstIterSoA2<>;
+  using ParticleIter = typename amrex::ParConstIterRTSoA<>;
 
   /** Initialize openPMD I/O routines
    *

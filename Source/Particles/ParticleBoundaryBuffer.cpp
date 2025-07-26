@@ -376,7 +376,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromDomainBoundaries (MultiParticleC
 {
     WARPX_PROFILE("ParticleBoundaryBuffer::gatherParticles");
 
-    using PIter = amrex::ParConstIterSoA2<>;
+    using PIter = amrex::ParConstIterRTSoA<>;
     const auto& warpx_instance = WarpX::GetInstance();
     const amrex::Geometry& geom = warpx_instance.Geom(0);
     auto plo = geom.ProbLoArray();
@@ -480,7 +480,7 @@ void ParticleBoundaryBuffer::gatherParticlesFromEmbeddedBoundaries (
     if (EB::enabled()) {
         WARPX_PROFILE("ParticleBoundaryBuffer::gatherParticles::EB");
 
-        using PIter = amrex::ParConstIterSoA2<>;
+        using PIter = amrex::ParConstIterRTSoA<>;
         const auto &warpx_instance = WarpX::GetInstance();
         const amrex::Geometry &geom = warpx_instance.Geom(0);
         auto plo = geom.ProbLoArray();
