@@ -1,3 +1,4 @@
 CEXE_sources += VarianceAccumulationBuffer.cpp
+CEXE_sources += CurrentDeposition.cpp
 
 VPATH_LOCATIONS   += $(WARPX_HOME)/Source/Particles/Deposition

@@ -311,8 +311,79 @@ void doDepositionShapeN (const GetParticlePosition<PIdx>& GetPosition,
                          const amrex::XDim3 & xyzmin,
                          amrex::Dim3 lo,
                          amrex::Real q,
-                         [[maybe_unused]]int n_rz_azimuthal_modes)
-{
+                         [[maybe_unused]]int n_rz_azimuthal_modes);
+
+
+extern template void doDepositionShapeN<1>(const GetParticlePosition<PIdx>& GetPosition,
+                         const amrex::ParticleReal * const wp,
+                         const amrex::ParticleReal * const uxp,
+                         const amrex::ParticleReal * const uyp,
+                         const amrex::ParticleReal * const uzp,
+                         const int* ion_lev,
+                         amrex::FArrayBox& jx_fab,
+                         amrex::FArrayBox& jy_fab,
+                         amrex::FArrayBox& jz_fab,
+                         long np_to_deposit,
+                         amrex::Real relative_time,
+                         const amrex::XDim3 & dinv,
+                         const amrex::XDim3 & xyzmin,
+                         amrex::Dim3 lo,
+                         amrex::Real q,
+                         [[maybe_unused]]int n_rz_azimuthal_modes);
+
+extern template void doDepositionShapeN<2>(const GetParticlePosition<PIdx>& GetPosition,
+                         const amrex::ParticleReal * const wp,
+                         const amrex::ParticleReal * const uxp,
+                         const amrex::ParticleReal * const uyp,
+                         const amrex::ParticleReal * const uzp,
+                         const int* ion_lev,
+                         amrex::FArrayBox& jx_fab,
+                         amrex::FArrayBox& jy_fab,
+                         amrex::FArrayBox& jz_fab,
+                         long np_to_deposit,
+                         amrex::Real relative_time,
+                         const amrex::XDim3 & dinv,
+                         const amrex::XDim3 & xyzmin,
+                         amrex::Dim3 lo,
+                         amrex::Real q,
+                         [[maybe_unused]]int n_rz_azimuthal_modes);
+
+extern template void doDepositionShapeN<3>(const GetParticlePosition<PIdx>& GetPosition,
+                         const amrex::ParticleReal * const wp,
+                         const amrex::ParticleReal * const uxp,
+                         const amrex::ParticleReal * const uyp,
+                         const amrex::ParticleReal * const uzp,
+                         const int* ion_lev,
+                         amrex::FArrayBox& jx_fab,
+                         amrex::FArrayBox& jy_fab,
+                         amrex::FArrayBox& jz_fab,
+                         long np_to_deposit,
+                         amrex::Real relative_time,
+                         const amrex::XDim3 & dinv,
+                         const amrex::XDim3 & xyzmin,
+                         amrex::Dim3 lo,
+                         amrex::Real q,
+                         [[maybe_unused]]int n_rz_azimuthal_modes);
+
+extern template void doDepositionShapeN<4>(const GetParticlePosition<PIdx>& GetPosition,
+                         const amrex::ParticleReal * const wp,
+                         const amrex::ParticleReal * const uxp,
+                         const amrex::ParticleReal * const uyp,
+                         const amrex::ParticleReal * const uzp,
+                         const int* ion_lev,
+                         amrex::FArrayBox& jx_fab,
+                         amrex::FArrayBox& jy_fab,
+                         amrex::FArrayBox& jz_fab,
+                         long np_to_deposit,
+                         amrex::Real relative_time,
+                         const amrex::XDim3 & dinv,
+                         const amrex::XDim3 & xyzmin,
+                         amrex::Dim3 lo,
+                         amrex::Real q,
+                         [[maybe_unused]]int n_rz_azimuthal_modes);
+
+
+/*{
     using namespace amrex::literals;
 
     // Whether ion_lev is a null pointer (do_ionization=0) or a real pointer
@@ -357,7 +428,7 @@ void doDepositionShapeN (const GetParticlePosition<PIdx>& GetPosition,
 
         }
     );
-}
+}*/
 
 /**
  * \brief Direct current deposition for thread thread_num for the implicit scheme
